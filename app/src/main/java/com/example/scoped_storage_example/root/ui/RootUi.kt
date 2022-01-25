@@ -15,10 +15,8 @@ fun RootUi(
     modifier: Modifier = Modifier
 ) {
     AppTheme {
-        val backgroundColor = MaterialTheme.colors.background
-
         Surface(
-            color = backgroundColor,
+            color = MaterialTheme.colors.background,
             modifier = modifier
                 .fillMaxSize()
         ) {
