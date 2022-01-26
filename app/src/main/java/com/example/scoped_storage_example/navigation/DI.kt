@@ -9,6 +9,9 @@ import org.koin.dsl.module
 val navigationModule = module {
 }
 
-fun ComponentFactory.createNavigationComponent(componentContext: ComponentContext): NavigationComponent {
-    return RealNavigationComponent(componentContext)
+fun ComponentFactory.createNavigationComponent(
+    componentContext: ComponentContext,
+    onOutput: (NavigationComponent.Output) -> Unit
+): NavigationComponent {
+    return RealNavigationComponent(componentContext, onOutput)
 }

@@ -8,6 +8,7 @@ import com.arkivanov.decompose.router.router
 import com.example.scoped_storage_example.core.ui.ComponentFactory
 import com.example.scoped_storage_example.core.utils.toComposeState
 import com.example.scoped_storage_example.navigation.createNavigationComponent
+import com.example.scoped_storage_example.navigation.ui.NavigationComponent
 import kotlinx.parcelize.Parcelize
 
 
@@ -29,9 +30,13 @@ class RealRootComponent(
     private fun createChild(config: ChildConfig, componentContext: ComponentContext) =
         when (config) {
             is ChildConfig.Navigation -> RootComponent.Child.Navigation(
-                componentFactory.createNavigationComponent(componentContext)
+                componentFactory.createNavigationComponent(componentContext, ::onNavigationOutput)
             )
         }
+
+    private fun onNavigationOutput(output: NavigationComponent.Output) {
+        // TODO: navigate
+    }
 
     private sealed interface ChildConfig : Parcelable {
 

@@ -24,4 +24,7 @@ private fun NavigationUiPreview() {
     }
 }
 
-class FakeNavigationComponent : NavigationComponent
+class FakeNavigationComponent : NavigationComponent {
+
+    override fun onAppStorageClick() = Unit
+}
