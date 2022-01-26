@@ -1,3 +1,8 @@
 package com.example.scoped_storage_example.app_storage.ui
 
-interface AppStorageComponent
+interface AppStorageComponent {
+
+    fun onAddLogClick()
+
+    fun onSaveLogClick()
+}

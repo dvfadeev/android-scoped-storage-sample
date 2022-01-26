@@ -3,5 +3,10 @@
 
     <!-- AppStorage -->
     <string name="app_storage_title">App Storage</string>
+    <string name="app_storage_add_log_text">If you click on the button, this action will be added to the logs of the current session.</string>
+    <string name="app_storage_add_log_button">Press to log</string>
+    <string name="app_storage_save_log_text">If you click on the button, the logs will be saved in the app storage.</string>
+    <string name="app_storage_save_log_button">Press to save</string>
+
 
 </resources>
