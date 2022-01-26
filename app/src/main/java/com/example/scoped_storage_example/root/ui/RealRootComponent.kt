@@ -7,7 +7,7 @@ import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.router.push
 import com.arkivanov.decompose.router.router
 import com.example.scoped_storage_example.app_storage.createAppStorageComponent
-import com.example.scoped_storage_example.core.data.logger.Logger
+import com.example.scoped_storage_example.core.data.gateway.logger.Logger
 import com.example.scoped_storage_example.core.utils.ComponentFactory
 import com.example.scoped_storage_example.core.utils.toComposeState
 import com.example.scoped_storage_example.navigation.createNavigationComponent

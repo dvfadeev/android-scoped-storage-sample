@@ -1,7 +1,7 @@
 package com.example.scoped_storage_example.app_storage.ui
 
 import com.arkivanov.decompose.ComponentContext
-import com.example.scoped_storage_example.core.data.logger.Logger
+import com.example.scoped_storage_example.core.data.gateway.logger.Logger
 
 class RealAppStorageComponent(
     componentContext: ComponentContext,
