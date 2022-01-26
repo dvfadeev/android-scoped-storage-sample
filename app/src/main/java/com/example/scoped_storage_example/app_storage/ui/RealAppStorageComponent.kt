@@ -6,12 +6,16 @@ import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
 import com.example.scoped_storage_example.app_storage.data.AppStorageGateway
 import com.example.scoped_storage_example.core.data.gateway.logger.Logger
+import com.example.scoped_storage_example.core.utils.componentCoroutineScope
+import kotlinx.coroutines.launch
 
 class RealAppStorageComponent(
     componentContext: ComponentContext,
     private val logger: Logger,
     private val appStorage: AppStorageGateway
 ) : ComponentContext by componentContext, AppStorageComponent {
+
+    private val coroutineScope = componentCoroutineScope()
 
     override var files: List<FileViewData> by mutableStateOf(listOf())
 
@@ -30,29 +34,37 @@ class RealAppStorageComponent(
     }
 
     override fun onSaveLogClick() {
-        val session = logger.getSession()
-        appStorage.writeTextFile(
-            fileName = "log " + session.time,
-            content = session.logs
-        )
-        refreshFiles()
+        coroutineScope.launch {
+            val session = logger.getSession()
+            appStorage.writeTextFile(
+                fileName = "log " + session.time,
+                content = session.logs
+            )
+            refreshFiles()
+        }
     }
 
     override fun onFileOpenClick(fileName: String) {
-        isShowFileContent = true
-        selectedFile = FileContentViewData(
-            name = fileName,
-            content = appStorage.openFile(fileName = fileName)
-        )
+        coroutineScope.launch {
+            isShowFileContent = true
+            selectedFile = FileContentViewData(
+                name = fileName,
+                content = appStorage.openFile(fileName = fileName)
+            )
+        }
     }
 
     override fun onFileRemoveClick(fileName: String) {
-        appStorage.removeFile(fileName)
-        refreshFiles()
+        coroutineScope.launch {
+            appStorage.removeFile(fileName)
+            refreshFiles()
+        }
     }
 
     private fun refreshFiles() {
-        files = appStorage.getFilesList().map { FileViewData(name = it) }
+        coroutineScope.launch {
+            files = appStorage.getFilesList().map { FileViewData(name = it) }
+        }
     }
 
     private fun onBackPressed(): Boolean {
