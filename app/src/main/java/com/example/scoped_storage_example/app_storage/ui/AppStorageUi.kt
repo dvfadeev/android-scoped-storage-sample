@@ -1,8 +1,6 @@
 package com.example.scoped_storage_example.app_storage.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -127,7 +125,8 @@ private fun FileContent(
             }
 
             Text(
-                text = file.content
+                text = file.content,
+                modifier = Modifier.verticalScroll(rememberScrollState())
             )
         }
     }
@@ -174,7 +173,9 @@ private fun DirectoriesItem(
     Card(
         backgroundColor = MaterialTheme.colors.primaryVariant,
         elevation = 7.dp,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 32.dp)
     ) {
         LazyColumn(
             modifier = Modifier

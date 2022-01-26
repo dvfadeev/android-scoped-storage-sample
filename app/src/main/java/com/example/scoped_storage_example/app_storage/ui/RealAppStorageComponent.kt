@@ -30,7 +30,7 @@ class RealAppStorageComponent(
     }
 
     override fun onAddLogClick() {
-        logger.log("Test button clicked!")
+        logger.log("Log button clicked!")
     }
 
     override fun onSaveLogClick() {
