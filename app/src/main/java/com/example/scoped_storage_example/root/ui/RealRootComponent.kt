@@ -7,6 +7,7 @@ import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.router.push
 import com.arkivanov.decompose.router.router
 import com.example.scoped_storage_example.app_storage.createAppStorageComponent
+import com.example.scoped_storage_example.core.data.logger.Logger
 import com.example.scoped_storage_example.core.utils.ComponentFactory
 import com.example.scoped_storage_example.core.utils.toComposeState
 import com.example.scoped_storage_example.navigation.createNavigationComponent
@@ -16,7 +17,8 @@ import kotlinx.parcelize.Parcelize
 
 class RealRootComponent(
     componentContext: ComponentContext,
-    private val componentFactory: ComponentFactory
+    private val componentFactory: ComponentFactory,
+    private val logger: Logger
 ) : ComponentContext by componentContext, RootComponent {
 
     private val router = router<ChildConfig, RootComponent.Child>(
@@ -29,8 +31,9 @@ class RealRootComponent(
         lifecycle
     )
 
-    private fun createChild(config: ChildConfig, componentContext: ComponentContext) =
-        when (config) {
+    private fun createChild(config: ChildConfig, componentContext: ComponentContext): RootComponent.Child {
+        logger.log("RootComponent navigate to ${config::class.simpleName}")
+        return when (config) {
             is ChildConfig.Navigation -> RootComponent.Child.Navigation(
                 componentFactory.createNavigationComponent(componentContext, ::onNavigationOutput)
             )
@@ -38,6 +41,7 @@ class RealRootComponent(
                 componentFactory.createAppStorageComponent(componentContext)
             )
         }
+    }
 
     private fun onNavigationOutput(output: NavigationComponent.Output) {
         when (output) {

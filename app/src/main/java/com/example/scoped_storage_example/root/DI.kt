@@ -11,5 +11,5 @@ val rootModule = module {
 }
 
 fun ComponentFactory.createRootComponent(componentContext: ComponentContext): RootComponent {
-    return RealRootComponent(componentContext, get())
+    return RealRootComponent(componentContext, get(), get())
 }
