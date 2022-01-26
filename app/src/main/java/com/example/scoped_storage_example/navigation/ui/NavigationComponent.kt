@@ -5,6 +5,6 @@ interface NavigationComponent {
     fun onAppStorageClick()
 
     sealed interface Output {
-        class ModuleRequested(type: NavigationModule) : Output
+        class ModuleRequested(val type: NavigationModule) : Output
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.arkivanov.decompose.Child
 import com.arkivanov.decompose.extensions.compose.jetpack.Children
 import com.arkivanov.decompose.router.RouterState
+import com.example.scoped_storage_example.app_storage.ui.AppStorageUi
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
 import com.example.scoped_storage_example.navigation.ui.FakeNavigationComponent
 import com.example.scoped_storage_example.navigation.ui.NavigationUi
@@ -27,6 +28,7 @@ fun RootUi(
             Children(component.routerState) { child ->
                 when (val instance = child.instance) {
                     is RootComponent.Child.Navigation -> NavigationUi(component = instance.component)
+                    is RootComponent.Child.AppStorage -> AppStorageUi(component = instance.component)
                 }
             }
         }
