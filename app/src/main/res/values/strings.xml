@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Scoped Storage Example</string>
+
+    <!-- AppStorage -->
+    <string name="app_storage_title">App Storage</string>
+
 </resources>
