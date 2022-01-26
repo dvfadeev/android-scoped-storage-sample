@@ -6,5 +6,9 @@ interface AppStorageGateway {
 
     fun writeFile(fileName: String, content: ByteArray)
 
+    fun openFile(fileName: String): String
+
+    fun removeFile(fileName: String)
+
     fun getFilesList(): List<String>
 }

@@ -18,6 +18,18 @@ class AppStorageGatewayImpl(private val context: Context) : AppStorageGateway {
         }
     }
 
+    override fun openFile(fileName: String): String {
+        var content = ""
+        context.openFileInput(fileName).bufferedReader().useLines { lines ->
+            content = lines.joinToString(separator = "\n")
+        }
+        return content
+    }
+
+    override fun removeFile(fileName: String) {
+        context.deleteFile(fileName)
+    }
+
     override fun getFilesList(): List<String> {
         return context.fileList().toList()
     }
