@@ -33,6 +33,6 @@ class AppStorageGatewayImpl(private val context: Context) : AppStorageGateway {
     }
 
     override suspend fun getFilesList(): List<String> {
-        return context.fileList().toList()
+        return context.fileList().toList().sortedBy { it }
     }
 }
