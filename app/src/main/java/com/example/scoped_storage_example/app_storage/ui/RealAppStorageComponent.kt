@@ -51,12 +51,14 @@ class RealAppStorageComponent(
                 name = fileName,
                 content = appStorage.openFile(fileName = fileName)
             )
+            logger.log("File $fileName opened")
         }
     }
 
     override fun onFileRemoveClick(fileName: String) {
         coroutineScope.launch {
             appStorage.removeFile(fileName)
+            logger.log("File $fileName removed")
             refreshFiles()
         }
     }
@@ -70,6 +72,7 @@ class RealAppStorageComponent(
     private fun onBackPressed(): Boolean {
         return if (isShowFileContent) {
             isShowFileContent = false
+            logger.log("File content viewer closed")
             true
         } else {
             false

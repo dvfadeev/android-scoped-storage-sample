@@ -1,5 +1,6 @@
 package com.example.scoped_storage_example.app_storage.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,7 +35,6 @@ fun AppStorageUi(
             )
         },
         content = {
-
             SlideAnimationScreen(
                 firstScreen = {
                     AppStorageContent(
@@ -66,6 +67,8 @@ private fun AppStorageContent(
     onFileOpenClick: (String) -> Unit,
     onFileRemoveClick: (String) -> Unit
 ) {
+    val toast = Toast.makeText(LocalContext.current, stringResource(id = R.string.app_storage_action_logged), Toast.LENGTH_SHORT)
+
     Column(
         verticalArrangement = Arrangement.spacedBy(20.dp),
         modifier = modifier
@@ -75,7 +78,10 @@ private fun AppStorageContent(
         AppStorageCardItem(
             text = stringResource(id = R.string.app_storage_add_log_text),
             buttonText = stringResource(id = R.string.app_storage_add_log_button),
-            onClick = onAddLogClick
+            onClick = {
+                onAddLogClick()
+                toast.show()
+            }
         )
 
         AppStorageCardItem(
@@ -113,7 +119,7 @@ private fun FileContent(
                 )
                 Text(
                     text = file.name,
-                    style = MaterialTheme.typography.h5
+                    style = MaterialTheme.typography.h6
                 )
                 Divider(
                     color = MaterialTheme.colors.onBackground,
@@ -126,6 +132,7 @@ private fun FileContent(
 
             Text(
                 text = file.content,
+                style = MaterialTheme.typography.caption,
                 modifier = Modifier.verticalScroll(rememberScrollState())
             )
         }
@@ -247,7 +254,6 @@ private fun FileItem(
         )
     }
 }
-
 
 @Preview(showSystemUi = true)
 @Composable
