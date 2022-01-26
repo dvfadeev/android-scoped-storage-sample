@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -16,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.scoped_storage_example.R
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
+import com.example.scoped_storage_example.core.ui.widgets.Toolbar
 
 @Composable
 fun NavigationUi(
@@ -25,15 +25,7 @@ fun NavigationUi(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(id = R.string.app_name),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            )
+            Toolbar(title = stringResource(id = R.string.app_name))
         },
         content = {
             NavigationContent(
