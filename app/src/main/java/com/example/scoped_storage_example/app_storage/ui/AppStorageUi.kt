@@ -1,5 +1,6 @@
 package com.example.scoped_storage_example.app_storage.ui
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -260,7 +261,8 @@ private fun DirectoriesItem(
                         color = MaterialTheme.colors.onPrimary,
                         shape = RoundedCornerShape(8.dp)
                     )
-                    .verticalScrollbar(listState, 4.dp),
+                    .verticalScrollbar(listState, 4.dp)
+                    .animateContentSize(),
                 state = listState
             ) {
                 items(files) {
