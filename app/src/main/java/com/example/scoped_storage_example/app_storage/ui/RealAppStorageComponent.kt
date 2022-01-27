@@ -18,7 +18,7 @@ class RealAppStorageComponent(
     private val externalStorage: AppStorageGatewayExternal
 ) : ComponentContext by componentContext, AppStorageComponent {
 
-    private var appStorage: AppStorageGateway = externalStorage
+    private var appStorage: AppStorageGateway = internalStorage
 
     private val coroutineScope = componentCoroutineScope()
 
