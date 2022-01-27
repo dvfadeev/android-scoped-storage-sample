@@ -14,6 +14,8 @@ interface AppStorageGateway {
 
     suspend fun getFilesList(): List<String>
 
+    suspend fun getAvailableSpaceMb(): Long
+
     fun String.makeTyped(type: String): String {
         return "$this.$type"
     }

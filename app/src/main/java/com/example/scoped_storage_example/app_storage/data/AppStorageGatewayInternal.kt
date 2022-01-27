@@ -1,9 +1,14 @@
 package com.example.scoped_storage_example.app_storage.data
 
 import android.content.Context
+import android.os.Build
+import android.os.StatFs
+import android.os.storage.StorageManager
+import androidx.core.content.getSystemService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.*
 
 /**
  * There are two ways to interact with internal app storage:
@@ -80,5 +85,21 @@ class AppStorageGatewayInternal(private val context: Context) : AppStorageGatewa
         } else {
             context.fileList().toList().sortedBy { it }
         }
+    }
+
+    /**
+     * Get available Internal storage space
+     * @return free space in MB's
+     */
+    override suspend fun getAvailableSpaceMb(): Long = withContext(Dispatchers.IO) {
+        val availableBytes = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val storageManager = context.getSystemService<StorageManager>()!!
+            val appSpecificInternalDirUuid: UUID = storageManager.getUuidForPath(rootFile)
+            storageManager.getAllocatableBytes(appSpecificInternalDirUuid)
+        } else {
+            val stat = StatFs(rootDir)
+            stat.availableBlocksLong * stat.blockSizeLong
+        }
+        return@withContext availableBytes / 1024 / 1024
     }
 }

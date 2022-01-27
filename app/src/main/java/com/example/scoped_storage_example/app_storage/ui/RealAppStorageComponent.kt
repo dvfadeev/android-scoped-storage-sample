@@ -11,6 +11,10 @@ import com.example.scoped_storage_example.core.data.gateway.logger.Logger
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
 import kotlinx.coroutines.launch
 
+/**
+ * Component for AppStorage
+ * Uses internal / external storage gateways to get access device storage
+ */
 class RealAppStorageComponent(
     componentContext: ComponentContext,
     private val logger: Logger,
@@ -23,6 +27,8 @@ class RealAppStorageComponent(
     private val coroutineScope = componentCoroutineScope()
 
     override var isInternalStorage: Boolean by mutableStateOf(true)
+
+    override var availableSpace: Long by mutableStateOf(0)
 
     override var files: List<FileViewData> by mutableStateOf(listOf())
 
@@ -41,6 +47,7 @@ class RealAppStorageComponent(
         isInternalStorage = !isInternalStorage
         setAppStore()
         refreshFiles()
+        logger.log("Toggle storage to ${if (isInternalStorage) "internal" else "external"}")
     }
 
     override fun onSaveLogClick() {
@@ -84,6 +91,7 @@ class RealAppStorageComponent(
 
     private fun refreshFiles() {
         coroutineScope.launch {
+            availableSpace = appStorage.getAvailableSpaceMb()
             files = appStorage.getFilesList().map { FileViewData(name = it) }
         }
     }

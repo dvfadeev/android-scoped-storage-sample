@@ -4,6 +4,8 @@ interface AppStorageComponent {
 
     var isInternalStorage: Boolean
 
+    var availableSpace: Long
+
     var files: List<FileViewData>
 
     var selectedFile: FileContentViewData?

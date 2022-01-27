@@ -37,7 +37,8 @@ fun SelectableButton(
         Text(
             text = text,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.caption
         )
     }
 }

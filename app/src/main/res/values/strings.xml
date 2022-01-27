@@ -1,13 +1,18 @@
 <resources>
     <string name="app_name">Scoped Storage Example</string>
 
+
+    <string name="space_mb">%dmb</string>
+
     <!-- AppStorage -->
     <string name="app_storage_title">App Storage</string>
-    <string name="app_storage_type_text">You can toggle between internal and external app storage</string>
+    <string name="app_storage_type_text">You can toggle between internal and external app storage.</string>
     <string name="app_storage_type_internal">Internal</string>
     <string name="app_storage_type_external">External</string>
     <string name="app_storage_save_log_text">If you click on the button, the logs will be saved in the app storage.</string>
     <string name="app_storage_save_log_button">Press to save</string>
+    <string name="app_storage_current_storage">Current app storage:</string>
+    <string name="app_storage_available_space">Available disk space:</string>
     <string name="app_storage_file_name">File name:</string>
     <string name="app_storage_file_remove">Remove</string>
 

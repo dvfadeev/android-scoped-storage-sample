@@ -4,10 +4,10 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -16,10 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.scoped_storage_example.R
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
-import com.example.scoped_storage_example.core.ui.widgets.ControlButton
-import com.example.scoped_storage_example.core.ui.widgets.SelectableButton
-import com.example.scoped_storage_example.core.ui.widgets.SlideAnimationScreen
-import com.example.scoped_storage_example.core.ui.widgets.Toolbar
+import com.example.scoped_storage_example.core.ui.widgets.*
 
 @Composable
 fun AppStorageUi(
@@ -40,6 +37,7 @@ fun AppStorageUi(
                     AppStorageContent(
                         modifier = Modifier.padding(it),
                         isInternalStorage = component.isInternalStorage,
+                        availableSpace = component.availableSpace,
                         files = component.files,
                         onToggleStorageClick = component::onToggleStorageClick,
                         onSaveLogClick = component::onSaveLogClick,
@@ -63,6 +61,7 @@ fun AppStorageUi(
 private fun AppStorageContent(
     modifier: Modifier = Modifier,
     isInternalStorage: Boolean,
+    availableSpace: Long,
     files: List<FileViewData>,
     onToggleStorageClick: () -> Unit,
     onSaveLogClick: () -> Unit,
@@ -87,6 +86,8 @@ private fun AppStorageContent(
         )
 
         DirectoriesItem(
+            isInternalStorage = isInternalStorage,
+            availableSpace = availableSpace,
             files = files,
             onFileOpenClick = onFileOpenClick,
             onFileRemoveClick = onFileRemoveClick
@@ -207,47 +208,83 @@ private fun AppStorageCardItem(
 
 @Composable
 private fun DirectoriesItem(
+    isInternalStorage: Boolean,
+    availableSpace: Long,
     files: List<FileViewData>,
     onFileOpenClick: (String) -> Unit,
     onFileRemoveClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     CustomCard(
-        modifier = modifier.padding(bottom = 32.dp),
+        modifier = modifier
+            .padding(bottom = 32.dp)
+            .fillMaxWidth(),
         backgroundColor = MaterialTheme.colors.primaryVariant
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(all = 16.dp)
-                .border(
-                    width = 2.dp,
-                    color = MaterialTheme.colors.onPrimary,
-                    shape = RoundedCornerShape(8.dp)
-                ),
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(all = 16.dp)
         ) {
-            items(files) {
-                var expanded by remember { mutableStateOf(false) }
-
-                Box {
-                    FileItem(
-                        file = it,
-                        onClick = { onFileOpenClick(it.name) },
-                        onLongClick = { expanded = true }
+            Row {
+                Text(
+                    text = stringResource(id = R.string.app_storage_current_storage),
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = stringResource(
+                        if (isInternalStorage) {
+                            R.string.app_storage_type_internal
+                        } else {
+                            R.string.app_storage_type_external
+                        }
                     )
+                )
+            }
 
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        modifier = Modifier.align(Alignment.BottomEnd)
-                    ) {
-                        DropdownMenuItem(
-                            onClick = {
-                                onFileRemoveClick(it.name)
-                                expanded = false
-                            }
+            Row {
+                Text(
+                    text = stringResource(id = R.string.app_storage_available_space),
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = stringResource(id = R.string.space_mb, availableSpace),
+                )
+            }
+
+            val listState = rememberLazyListState()
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colors.onPrimary,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .verticalScrollbar(listState, 4.dp),
+                state = listState
+            ) {
+                items(files) {
+                    var expanded by remember { mutableStateOf(false) }
+
+                    Box {
+                        FileItem(
+                            file = it,
+                            onClick = { onFileOpenClick(it.name) },
+                            onLongClick = { expanded = true }
+                        )
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
                         ) {
-                            Text(stringResource(id = R.string.app_storage_file_remove))
+                            DropdownMenuItem(
+                                onClick = {
+                                    onFileRemoveClick(it.name)
+                                    expanded = false
+                                }
+                            ) {
+                                Text(stringResource(id = R.string.app_storage_file_remove))
+                            }
                         }
                     }
                 }
@@ -312,6 +349,8 @@ private fun AppStorageUiPreview() {
 class FakeAppStorageComponent : AppStorageComponent {
 
     override var isInternalStorage: Boolean = true
+
+    override var availableSpace: Long = 100
 
     override var files: List<FileViewData> = FileViewData.mocks()
 
