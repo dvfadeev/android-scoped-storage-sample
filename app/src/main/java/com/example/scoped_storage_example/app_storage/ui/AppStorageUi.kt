@@ -1,6 +1,5 @@
 package com.example.scoped_storage_example.app_storage.ui
 
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,13 +10,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.scoped_storage_example.R
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
 import com.example.scoped_storage_example.core.ui.widgets.ControlButton
+import com.example.scoped_storage_example.core.ui.widgets.SelectableButton
 import com.example.scoped_storage_example.core.ui.widgets.SlideAnimationScreen
 import com.example.scoped_storage_example.core.ui.widgets.Toolbar
 
@@ -39,8 +39,9 @@ fun AppStorageUi(
                 firstScreen = {
                     AppStorageContent(
                         modifier = Modifier.padding(it),
+                        isInternalStorage = component.isInternalStorage,
                         files = component.files,
-                        onAddLogClick = component::onAddLogClick,
+                        onToggleStorageClick = component::onToggleStorageClick,
                         onSaveLogClick = component::onSaveLogClick,
                         onFileOpenClick = component::onFileOpenClick,
                         onFileRemoveClick = component::onFileRemoveClick
@@ -61,27 +62,22 @@ fun AppStorageUi(
 @Composable
 private fun AppStorageContent(
     modifier: Modifier = Modifier,
+    isInternalStorage: Boolean,
     files: List<FileViewData>,
-    onAddLogClick: () -> Unit,
+    onToggleStorageClick: () -> Unit,
     onSaveLogClick: () -> Unit,
     onFileOpenClick: (String) -> Unit,
     onFileRemoveClick: (String) -> Unit
 ) {
-    val toast = Toast.makeText(LocalContext.current, stringResource(id = R.string.app_storage_action_logged), Toast.LENGTH_SHORT)
-
     Column(
         verticalArrangement = Arrangement.spacedBy(20.dp),
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 20.dp, start = 16.dp, end = 16.dp)
     ) {
-        AppStorageCardItem(
-            text = stringResource(id = R.string.app_storage_add_log_text),
-            buttonText = stringResource(id = R.string.app_storage_add_log_button),
-            onClick = {
-                onAddLogClick()
-                toast.show()
-            }
+        AppStorageToggleItem(
+            isInternalStorage = isInternalStorage,
+            onClick = onToggleStorageClick,
         )
 
         AppStorageCardItem(
@@ -140,16 +136,55 @@ private fun FileContent(
 }
 
 @Composable
+private fun AppStorageToggleItem(
+    isInternalStorage: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CustomCard(
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(all = 16.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.app_storage_type_text),
+                modifier = Modifier.weight(1f)
+            )
+
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min)
+            ) {
+                SelectableButton(
+                    text = stringResource(id = R.string.app_storage_type_internal),
+                    isSelected = isInternalStorage,
+                    onClick = onClick,
+                    shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
+                )
+
+                SelectableButton(
+                    text = stringResource(id = R.string.app_storage_type_external),
+                    isSelected = !isInternalStorage,
+                    onClick = onClick,
+                    shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
 private fun AppStorageCardItem(
     text: String,
     buttonText: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        backgroundColor = MaterialTheme.colors.background,
-        elevation = 7.dp,
-        modifier = modifier.fillMaxWidth()
+    CustomCard(
+        modifier = modifier
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -177,12 +212,9 @@ private fun DirectoriesItem(
     onFileRemoveClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        backgroundColor = MaterialTheme.colors.primaryVariant,
-        elevation = 7.dp,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 32.dp)
+    CustomCard(
+        modifier = modifier.padding(bottom = 32.dp),
+        backgroundColor = MaterialTheme.colors.primaryVariant
     ) {
         LazyColumn(
             modifier = Modifier
@@ -255,6 +287,20 @@ private fun FileItem(
     }
 }
 
+@Composable
+private fun CustomCard(
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colors.background,
+    content: @Composable () -> Unit
+) {
+    Card(
+        backgroundColor = backgroundColor,
+        elevation = 7.dp,
+        modifier = modifier.fillMaxWidth(),
+        content = content
+    )
+}
+
 @Preview(showSystemUi = true)
 @Composable
 private fun AppStorageUiPreview() {
@@ -265,18 +311,19 @@ private fun AppStorageUiPreview() {
 
 class FakeAppStorageComponent : AppStorageComponent {
 
+    override var isInternalStorage: Boolean = true
+
     override var files: List<FileViewData> = FileViewData.mocks()
 
     override var selectedFile: FileContentViewData? = null
 
     override var isShowFileContent: Boolean = false
 
-    override fun onAddLogClick() = Unit
+    override fun onToggleStorageClick() = Unit
 
     override fun onSaveLogClick() = Unit
 
     override fun onFileOpenClick(fileName: String) = Unit
 
     override fun onFileRemoveClick(fileName: String) = Unit
-
 }

@@ -18,9 +18,11 @@ class RealAppStorageComponent(
     private val externalStorage: AppStorageGatewayExternal
 ) : ComponentContext by componentContext, AppStorageComponent {
 
-    private var appStorage: AppStorageGateway = internalStorage
+    private lateinit var appStorage: AppStorageGateway
 
     private val coroutineScope = componentCoroutineScope()
+
+    override var isInternalStorage: Boolean by mutableStateOf(true)
 
     override var files: List<FileViewData> by mutableStateOf(listOf())
 
@@ -30,12 +32,15 @@ class RealAppStorageComponent(
 
     init {
         logger.log("Init AppStorageComponent")
+        setAppStore()
         refreshFiles()
         backPressedHandler.register(::onBackPressed)
     }
 
-    override fun onAddLogClick() {
-        logger.log("Log button clicked!")
+    override fun onToggleStorageClick() {
+        isInternalStorage = !isInternalStorage
+        setAppStore()
+        refreshFiles()
     }
 
     override fun onSaveLogClick() {
@@ -66,6 +71,14 @@ class RealAppStorageComponent(
             appStorage.removeFile(fileName)
             logger.log("File $fileName removed")
             refreshFiles()
+        }
+    }
+
+    private fun setAppStore() {
+        appStorage = if (isInternalStorage) {
+            externalStorage
+        } else {
+            internalStorage
         }
     }
 

@@ -3,9 +3,9 @@
 
     <!-- AppStorage -->
     <string name="app_storage_title">App Storage</string>
-    <string name="app_storage_add_log_text">If you click on the button, this action will be added to the logs of the current session.</string>
-    <string name="app_storage_add_log_button">Press to log</string>
-    <string name="app_storage_action_logged">Action logged</string>
+    <string name="app_storage_type_text">You can toggle between internal and external app storage</string>
+    <string name="app_storage_type_internal">Internal</string>
+    <string name="app_storage_type_external">External</string>
     <string name="app_storage_save_log_text">If you click on the button, the logs will be saved in the app storage.</string>
     <string name="app_storage_save_log_button">Press to save</string>
     <string name="app_storage_file_name">File name:</string>
