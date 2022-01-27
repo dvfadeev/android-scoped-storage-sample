@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Scoped Storage Example</string>
-
-
     <string name="space_mb">%dmb</string>
 
     <!-- AppStorage -->
@@ -15,5 +13,8 @@
     <string name="app_storage_available_space">Available disk space:</string>
     <string name="app_storage_file_name">File name:</string>
     <string name="app_storage_file_remove">Remove</string>
+
+    <!-- MediaStore -->
+    <string name="media_store_title">Media Store</string>
 
 </resources>

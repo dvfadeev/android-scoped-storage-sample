@@ -30,6 +30,7 @@ fun NavigationUi(
         content = {
             NavigationContent(
                 onAppStorageClick = component::onAppStorageClick,
+                onMediaStoreClick = component::onMediaStoreClick,
                 modifier = Modifier.padding(it)
             )
         }
@@ -39,6 +40,7 @@ fun NavigationUi(
 @Composable
 private fun NavigationContent(
     onAppStorageClick: () -> Unit,
+    onMediaStoreClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -48,6 +50,11 @@ private fun NavigationContent(
         NavigationButton(
             text = stringResource(id = R.string.app_storage_title),
             onClick = onAppStorageClick
+        )
+
+        NavigationButton(
+            text = stringResource(id = R.string.media_store_title),
+            onClick = onMediaStoreClick
         )
     }
 }
@@ -83,4 +90,6 @@ private fun NavigationUiPreview() {
 class FakeNavigationComponent : NavigationComponent {
 
     override fun onAppStorageClick() = Unit
+
+    override fun onMediaStoreClick() = Unit
 }
