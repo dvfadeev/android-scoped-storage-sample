@@ -1,7 +1,7 @@
 package com.example.scoped_storage_example.navigation
 
 import com.arkivanov.decompose.ComponentContext
-import com.example.scoped_storage_example.core.ui.ComponentFactory
+import com.example.scoped_storage_example.core.utils.ComponentFactory
 import com.example.scoped_storage_example.navigation.ui.NavigationComponent
 import com.example.scoped_storage_example.navigation.ui.RealNavigationComponent
 import org.koin.dsl.module

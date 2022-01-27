@@ -32,6 +32,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
         useIR = true
     }
     buildFeatures {
@@ -69,4 +70,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.3.2'
 }

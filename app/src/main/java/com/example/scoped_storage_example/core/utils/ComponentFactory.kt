@@ -1,4 +1,4 @@
-package com.example.scoped_storage_example.core.ui
+package com.example.scoped_storage_example.core.utils
 
 import org.koin.core.Koin
 import org.koin.core.component.KoinComponent

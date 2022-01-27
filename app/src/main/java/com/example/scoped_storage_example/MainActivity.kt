@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.arkivanov.decompose.defaultComponentContext
 import com.example.scoped_storage_example.core.koin
-import com.example.scoped_storage_example.core.ui.ComponentFactory
+import com.example.scoped_storage_example.core.utils.ComponentFactory
 import com.example.scoped_storage_example.root.createRootComponent
 import com.example.scoped_storage_example.root.ui.RootComponent
 import com.example.scoped_storage_example.root.ui.RootUi
