@@ -4,19 +4,11 @@ import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class AppStorageGatewayImpl(private val context: Context) : AppStorageGateway {
+class AppStorageGatewayInternal(private val context: Context) : AppStorageGateway {
 
-    companion object {
-        private const val TYPE_TEXT = ".txt"
-    }
-
-    override suspend fun writeTextFile(fileName: String, content: String) {
-        writeFile(fileName + TYPE_TEXT, content.toByteArray())
-    }
-
-    override suspend fun writeFile(fileName: String, content: ByteArray) = withContext(Dispatchers.IO) {
-        context.openFileOutput(fileName, Context.MODE_PRIVATE).use {
-            it.write(content)
+    override suspend fun writeFile(fileName: String, type: String, content: String) = withContext(Dispatchers.IO) {
+        context.openFileOutput(fileName.makeTyped(type), Context.MODE_PRIVATE).use {
+            it.write(content.toByteArray())
         }
     }
 
@@ -25,6 +17,7 @@ class AppStorageGatewayImpl(private val context: Context) : AppStorageGateway {
         context.openFileInput(fileName).bufferedReader().useLines { lines ->
             content = lines.joinToString(separator = "\n")
         }
+
         return@withContext content
     }
 

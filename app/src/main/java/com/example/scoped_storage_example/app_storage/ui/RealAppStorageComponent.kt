@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
 import com.example.scoped_storage_example.app_storage.data.AppStorageGateway
+import com.example.scoped_storage_example.app_storage.data.AppStorageGatewayExternal
+import com.example.scoped_storage_example.app_storage.data.AppStorageGatewayInternal
 import com.example.scoped_storage_example.core.data.gateway.logger.Logger
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
 import kotlinx.coroutines.launch
@@ -12,8 +14,11 @@ import kotlinx.coroutines.launch
 class RealAppStorageComponent(
     componentContext: ComponentContext,
     private val logger: Logger,
-    private val appStorage: AppStorageGateway
+    private val internalStorage: AppStorageGatewayInternal,
+    private val externalStorage: AppStorageGatewayExternal
 ) : ComponentContext by componentContext, AppStorageComponent {
+
+    private var appStorage: AppStorageGateway = externalStorage
 
     private val coroutineScope = componentCoroutineScope()
 
@@ -36,8 +41,9 @@ class RealAppStorageComponent(
     override fun onSaveLogClick() {
         coroutineScope.launch {
             val session = logger.getSession()
-            appStorage.writeTextFile(
+            appStorage.writeFile(
                 fileName = "log " + session.time,
+                type = AppStorageGateway.TYPE_TEXT,
                 content = session.logs
             )
             refreshFiles()
