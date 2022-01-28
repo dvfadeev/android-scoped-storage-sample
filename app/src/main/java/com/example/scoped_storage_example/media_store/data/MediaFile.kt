@@ -7,5 +7,5 @@ data class MediaFile(
     val name: String,
     val type: String,
     val sizeKb: Int,
-    val date: String
+    val date: Long
 )

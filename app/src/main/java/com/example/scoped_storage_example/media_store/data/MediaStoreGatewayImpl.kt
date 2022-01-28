@@ -57,7 +57,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                     name = name,
                     type = type,
                     sizeKb = sizeKb,
-                    date = date
+                    date = date.toLong() * 1000
                 )
             }
         }
