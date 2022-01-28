@@ -9,7 +9,9 @@ import java.io.File
 
 class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
 
-    override suspend fun load(): List<MediaFile> = withContext(Dispatchers.IO) {
+    override suspend fun load(
+        type: MediaType
+    ): List<MediaFile> = withContext(Dispatchers.IO) {
         val files = mutableListOf<MediaFile>()
         val resolver = context.contentResolver
         val projection = arrayOf(
@@ -20,7 +22,12 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             MediaStore.Files.FileColumns.DATE_ADDED
         )
 
-        val contentUri = MediaStore.Files.getContentUri("external")
+        val contentUri = when (type) {
+            MediaType.All -> MediaStore.Files.getContentUri("external")
+            MediaType.Images -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            MediaType.Videos -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            MediaType.Audio -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        }
 
         resolver.query(
             contentUri,

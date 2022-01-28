@@ -20,5 +20,9 @@
     <string name="media_store_title">Media Store</string>
     <string name="media_store_permission_request">To open media storage u have to grant read external storage permission</string>
     <string name="media_store_file">file</string>
+    <string name="media_store_type_all">All</string>
+    <string name="media_store_type_images">Images</string>
+    <string name="media_store_type_videos">Video</string>
+    <string name="media_store_type_audio">Audio</string>
 
 </resources>

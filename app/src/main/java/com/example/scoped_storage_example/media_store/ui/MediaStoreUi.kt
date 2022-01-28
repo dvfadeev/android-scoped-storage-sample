@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -24,13 +23,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
-import coil.fetch.VideoFrameUriFetcher
+import coil.decode.VideoFrameDecoder
 import com.example.scoped_storage_example.R
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
 import com.example.scoped_storage_example.core.ui.theme.additionalColors
 import com.example.scoped_storage_example.core.ui.widgets.ControlButton
+import com.example.scoped_storage_example.core.ui.widgets.SelectableButton
 import com.example.scoped_storage_example.core.ui.widgets.Toolbar
 import com.example.scoped_storage_example.core.ui.widgets.verticalScrollbar
+import com.example.scoped_storage_example.media_store.data.MediaType
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionRequired
 import com.google.accompanist.permissions.rememberPermissionState
@@ -71,7 +72,7 @@ private fun MediaStorePermissionScreen(
         permissionState = storagePermissionState,
         permissionNotGrantedContent = {
             Box(modifier = modifier.fillMaxSize()) {
-                Column(modifier = modifier.align(Alignment.Center)) {
+                Column(modifier = modifier.align(Center)) {
                     Text(
                         text = stringResource(id = R.string.media_store_permission_request),
                         textAlign = TextAlign.Center
@@ -98,11 +99,50 @@ private fun MediaStorePermissionScreen(
     ) {
         onLoadMedia.invoke()
 
-        component.mediaFiles?.let {
-            MediaStoreContent(
-                mediaFiles = it,
-                modifier = modifier
-            )
+        MediaStoreContent(
+            mediaType = component.mediaType,
+            mediaFiles = component.mediaFiles,
+            onChangeMediaType = component::onChangeMediaType,
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+private fun MediaStoreContent(
+    mediaType: MediaType,
+    mediaFiles: List<MediaFileViewData>?,
+    onChangeMediaType: (MediaType) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 20.dp)
+    ) {
+        MediaTypeSelector(
+            mediaType = mediaType,
+            onChangeMediaType = {
+                //  Coil.imageLoader(context).memoryCache.clear()
+                onChangeMediaType(it)
+            },
+            modifier = Modifier.align(CenterHorizontally)
+        )
+
+        mediaFiles?.let {
+            val listState = rememberLazyListState()
+            LazyColumn(
+                contentPadding = PaddingValues(top = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .verticalScrollbar(listState, 4.dp, color = MaterialTheme.colors.primary),
+                state = listState
+            ) {
+                items(mediaFiles) {
+                    MediaFileItem(data = it)
+                }
+            }
         } ?: run {
             Box(modifier = Modifier.fillMaxSize()) {
                 CircularProgressIndicator(modifier = Modifier.align(Center))
@@ -111,22 +151,41 @@ private fun MediaStorePermissionScreen(
     }
 }
 
+
 @Composable
-private fun MediaStoreContent(
-    mediaFiles: List<MediaFileViewData>,
+private fun MediaTypeSelector(
+    mediaType: MediaType,
+    onChangeMediaType: (MediaType) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val listState = rememberLazyListState()
-    LazyColumn(
-        contentPadding = PaddingValues(top = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier
-            .verticalScrollbar(listState, 4.dp, color = MaterialTheme.colors.primary),
-        state = listState
+    Row(
+        modifier = modifier.height(IntrinsicSize.Min)
     ) {
-        items(mediaFiles) {
-            MediaFileItem(data = it)
-        }
+        SelectableButton(
+            text = stringResource(id = R.string.media_store_type_all),
+            isSelected = mediaType == MediaType.All,
+            onClick = { onChangeMediaType(MediaType.All) },
+            shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
+        )
+
+        SelectableButton(
+            text = stringResource(id = R.string.media_store_type_images),
+            isSelected = mediaType == MediaType.Images,
+            onClick = { onChangeMediaType(MediaType.Images) }
+        )
+
+        SelectableButton(
+            text = stringResource(id = R.string.media_store_type_videos),
+            isSelected = mediaType == MediaType.Videos,
+            onClick = { onChangeMediaType(MediaType.Videos) }
+        )
+
+        SelectableButton(
+            text = stringResource(id = R.string.media_store_type_audio),
+            isSelected = mediaType == MediaType.Audio,
+            onClick = { onChangeMediaType(MediaType.Audio) },
+            shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
+        )
     }
 }
 
@@ -149,8 +208,9 @@ private fun MediaFileItem(
                 data.uri,
                 builder = {
                     with(LocalDensity.current) { size(72.dp.roundToPx()) }
+                    placeholder(R.color.cardview_dark_background)
                     if (data.type == "video") {
-                        fetcher(VideoFrameUriFetcher(context))
+                        decoder(VideoFrameDecoder(context))
                         crossfade(true)
                     }
                 }
@@ -198,16 +258,25 @@ fun CaptionText(
 @Composable
 private fun MediaStoreUiPreview() {
     AppTheme {
-        MediaStoreContent(FakeMediaStoreComponent().mediaFiles!!)
+        val component = FakeMediaStoreComponent()
+        MediaStoreContent(
+            component.mediaType,
+            component.mediaFiles!!,
+            component::onChangeMediaType
+        )
     }
 }
 
 class FakeMediaStoreComponent : MediaStoreComponent {
+
+    override var mediaType: MediaType = MediaType.All
 
     override var mediaFiles: List<MediaFileViewData>? = List(5) {
         MediaFileViewData.MOCK
     }
 
     override fun onLoadMedia() = Unit
+
+    override fun onChangeMediaType(mediaType: MediaType) = Unit
 }
 
