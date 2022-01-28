@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Scoped Storage Example</string>
     <string name="space_mb">%dmb</string>
+    <string name="ok">OK</string>
+    <string name="close">Close</string>
 
     <!-- AppStorage -->
     <string name="app_storage_title">App Storage</string>
@@ -16,5 +18,6 @@
 
     <!-- MediaStore -->
     <string name="media_store_title">Media Store</string>
+    <string name="media_store_permission_request">To open media storage u have to grant read external storage permission</string>
 
 </resources>
