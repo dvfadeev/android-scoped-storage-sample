@@ -10,4 +10,8 @@ class RealNavigationComponent(
     override fun onAppStorageClick() {
         onOutput(NavigationComponent.Output.ModuleRequested(NavigationModule.AppStorage))
     }
+
+    override fun onMediaStoreClick() {
+        onOutput(NavigationComponent.Output.ModuleRequested(NavigationModule.MediaStore))
+    }
 }

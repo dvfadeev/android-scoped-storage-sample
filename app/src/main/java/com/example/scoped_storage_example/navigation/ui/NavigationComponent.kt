@@ -4,6 +4,8 @@ interface NavigationComponent {
 
     fun onAppStorageClick()
 
+    fun onMediaStoreClick()
+
     sealed interface Output {
         class ModuleRequested(val type: NavigationModule) : Output
     }

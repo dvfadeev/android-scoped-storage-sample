@@ -7,6 +7,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.example.scoped_storage_example.app_storage.data.AppStorageGateway
 import com.example.scoped_storage_example.app_storage.data.AppStorageGatewayExternal
 import com.example.scoped_storage_example.app_storage.data.AppStorageGatewayInternal
+import com.example.scoped_storage_example.core.data.FileTypes
 import com.example.scoped_storage_example.core.data.gateway.logger.Logger
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
 import kotlinx.coroutines.launch
@@ -55,7 +56,7 @@ class RealAppStorageComponent(
             val session = logger.getSession()
             appStorage.writeFile(
                 fileName = "log " + session.time,
-                type = AppStorageGateway.TYPE_TEXT,
+                type = FileTypes.TYPE_TEXT,
                 content = session.logs
             )
             refreshFiles()

@@ -10,6 +10,7 @@ import com.example.scoped_storage_example.app_storage.createAppStorageComponent
 import com.example.scoped_storage_example.core.data.gateway.logger.Logger
 import com.example.scoped_storage_example.core.utils.ComponentFactory
 import com.example.scoped_storage_example.core.utils.toComposeState
+import com.example.scoped_storage_example.media_store.createMediaStoreComponent
 import com.example.scoped_storage_example.navigation.createNavigationComponent
 import com.example.scoped_storage_example.navigation.ui.NavigationComponent
 import com.example.scoped_storage_example.navigation.ui.NavigationModule
@@ -40,6 +41,9 @@ class RealRootComponent(
             is ChildConfig.AppStorage -> RootComponent.Child.AppStorage(
                 componentFactory.createAppStorageComponent(componentContext)
             )
+            is ChildConfig.MediaStore -> RootComponent.Child.MediaStore(
+                componentFactory.createMediaStoreComponent(componentContext)
+            )
         }
     }
 
@@ -49,6 +53,9 @@ class RealRootComponent(
                 when (output.type) {
                     NavigationModule.AppStorage -> {
                         router.push(ChildConfig.AppStorage)
+                    }
+                    NavigationModule.MediaStore -> {
+                        router.push(ChildConfig.MediaStore)
                     }
                 }
             }
@@ -62,5 +69,8 @@ class RealRootComponent(
 
         @Parcelize
         object AppStorage : ChildConfig
+
+        @Parcelize
+        object MediaStore : ChildConfig
     }
 }

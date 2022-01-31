@@ -16,7 +16,7 @@ fun SelectableButton(
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: RoundedCornerShape = RoundedCornerShape(8.dp),
+    shape: RoundedCornerShape = RoundedCornerShape(0.dp),
 ) {
     OutlinedButton(
         onClick = onClick,
