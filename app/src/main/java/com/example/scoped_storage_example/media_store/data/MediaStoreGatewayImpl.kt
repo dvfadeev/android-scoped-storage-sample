@@ -17,8 +17,15 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 
+/**
+ * Interaction with media files is performed through the content resolver
+ */
 class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
 
+    /**
+     * Load all media files according to the selected type
+     * @return list of MediaFile models
+     */
     override suspend fun loadMediaFiles(
         mediaType: MediaType
     ): List<MediaFile> = withContext(Dispatchers.IO) {
@@ -82,6 +89,10 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
         return@withContext files.reversed()
     }
 
+    /**
+     * Write image in media storage
+     * The file will be saved in the pictures directory
+     */
     override suspend fun writeImage(fileName: String, bitmap: Bitmap) = withContext(Dispatchers.IO) {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + "." + FileTypes.TYPE_PHOTO)
@@ -116,7 +127,11 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
         return@withContext
     }
 
-    override suspend fun openMediaFile(uri: Uri): DetailedMediaFile? {
+    /**
+     * Open media file by uri
+     * @return detailed MediaFile model with additional fields
+     */
+    override suspend fun openMediaFile(uri: Uri): DetailedMediaFile? = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         var resultImage: DetailedMediaFile? = null
 
@@ -180,9 +195,13 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                 }
             )
         }
-        return resultImage
+        return@withContext resultImage
     }
 
+    /**
+     * Remove file from media storage
+     * It will be removed from disk as well
+     */
     override suspend fun removeMediaFile(uri: Uri) = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         resolver.delete(uri, null, null)
