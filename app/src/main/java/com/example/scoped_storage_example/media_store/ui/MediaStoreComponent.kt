@@ -2,7 +2,7 @@ package com.example.scoped_storage_example.media_store.ui
 
 import android.graphics.Bitmap
 import android.net.Uri
-import com.example.scoped_storage_example.media_store.data.MediaType
+import com.example.scoped_storage_example.media_store.data.models.MediaType
 
 interface MediaStoreComponent {
 

@@ -1,7 +1,7 @@
 package com.example.scoped_storage_example.media_store.ui
 
 import android.net.Uri
-import com.example.scoped_storage_example.media_store.data.MediaFile
+import com.example.scoped_storage_example.media_store.data.models.MediaFile
 import java.text.SimpleDateFormat
 import java.util.*
 

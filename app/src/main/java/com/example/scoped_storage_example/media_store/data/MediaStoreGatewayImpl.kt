@@ -9,6 +9,9 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import com.example.scoped_storage_example.core.data.FileTypes
+import com.example.scoped_storage_example.media_store.data.models.DetailedMediaFile
+import com.example.scoped_storage_example.media_store.data.models.MediaFile
+import com.example.scoped_storage_example.media_store.data.models.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

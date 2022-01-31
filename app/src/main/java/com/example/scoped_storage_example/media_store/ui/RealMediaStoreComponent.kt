@@ -10,7 +10,7 @@ import com.example.scoped_storage_example.core.data.gateway.current_time.Current
 import com.example.scoped_storage_example.core.data.gateway.logger.Logger
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
 import com.example.scoped_storage_example.media_store.data.MediaStoreGateway
-import com.example.scoped_storage_example.media_store.data.MediaType
+import com.example.scoped_storage_example.media_store.data.models.MediaType
 import kotlinx.coroutines.launch
 
 class RealMediaStoreComponent(

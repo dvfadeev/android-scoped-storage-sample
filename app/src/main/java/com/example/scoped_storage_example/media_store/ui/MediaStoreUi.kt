@@ -38,7 +38,7 @@ import com.example.scoped_storage_example.R
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
 import com.example.scoped_storage_example.core.ui.theme.additionalColors
 import com.example.scoped_storage_example.core.ui.widgets.*
-import com.example.scoped_storage_example.media_store.data.MediaType
+import com.example.scoped_storage_example.media_store.data.models.MediaType
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionRequired
 import com.google.accompanist.permissions.rememberPermissionState
