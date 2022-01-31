@@ -2,17 +2,20 @@ package com.example.scoped_storage_example.media_store.ui
 
 import android.app.Activity
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -108,6 +111,7 @@ private fun MediaStorePermissionScreen(
             mediaFiles = component.mediaFiles,
             onSaveBitmap = component::onSaveBitmap,
             onChangeMediaType = component::onChangeMediaType,
+            onFileRemoveClick = component::onFileRemoveClick,
             modifier = modifier
         )
     }
@@ -119,6 +123,7 @@ private fun MediaStoreContent(
     mediaFiles: List<MediaFileViewData>?,
     onSaveBitmap: (Bitmap) -> Unit,
     onChangeMediaType: (MediaType) -> Unit,
+    onFileRemoveClick: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { photo ->
@@ -155,7 +160,10 @@ private fun MediaStoreContent(
                 state = listState
             ) {
                 items(mediaFiles) {
-                    MediaFileItem(data = it)
+                    MediaFileItem(
+                        data = it,
+                        onFileRemoveClick = onFileRemoveClick
+                    )
                 }
             }
         } ?: run {
@@ -204,56 +212,83 @@ private fun MediaTypeSelector(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MediaFileItem(
     data: MediaFileViewData,
+    onFileRemoveClick: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    ) {
-        Image(
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        Row(
             modifier = Modifier
-                .size(72.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            painter = rememberImagePainter(
-                data.uri,
-                builder = {
-                    with(LocalDensity.current) { size(72.dp.roundToPx()) }
-                    placeholder(R.color.cardview_dark_background)
-                    if (data.type == "video") {
-                        decoder(VideoFrameDecoder(context))
-                        crossfade(true)
-                    }
-                }
-            ),
-            contentScale = ContentScale.Crop,
-            contentDescription = null
-        )
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .combinedClickable(
+                    onClick = { },
+                    onLongClick = { expanded = true }
+                )
 
-        Column(modifier = Modifier.padding(start = 8.dp)) {
-            Text(
-                text = data.name,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            CaptionText(text = data.type + " " + stringResource(id = R.string.media_store_file))
-
-            CaptionText(text = data.size)
-
-            CaptionText(text = data.date)
-
-            Divider(
-                color = MaterialTheme.colors.onBackground,
-                thickness = 2.dp,
+        ) {
+            Image(
                 modifier = Modifier
-                    .padding(top = 8.dp)
-                    .alpha(0.1f)
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                painter = rememberImagePainter(
+                    data.uri,
+                    builder = {
+                        with(LocalDensity.current) { size(72.dp.roundToPx()) }
+                        placeholder(R.color.cardview_dark_background)
+                        if (data.type == "video") {
+                            decoder(VideoFrameDecoder(context))
+                            crossfade(true)
+                        }
+                    }
+                ),
+                contentScale = ContentScale.Crop,
+                contentDescription = null
             )
+
+            Column(modifier = Modifier.padding(start = 8.dp)) {
+                Text(
+                    text = data.name,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                CaptionText(text = data.type + " " + stringResource(id = R.string.media_store_file))
+
+                CaptionText(text = data.size)
+
+                CaptionText(text = data.date)
+
+                Divider(
+                    color = MaterialTheme.colors.onBackground,
+                    thickness = 2.dp,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .alpha(0.1f)
+                )
+            }
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    data.uri?.let {
+                        onFileRemoveClick(it)
+                    }
+                    expanded = false
+                }
+            ) {
+                Text(stringResource(id = R.string.media_store_file_remove))
+            }
         }
     }
 }
@@ -278,7 +313,8 @@ private fun MediaStoreUiPreview() {
             component.mediaType,
             component.mediaFiles!!,
             component::onSaveBitmap,
-            component::onChangeMediaType
+            component::onChangeMediaType,
+            component::onFileRemoveClick
         )
     }
 }
@@ -296,5 +332,7 @@ class FakeMediaStoreComponent : MediaStoreComponent {
     override fun onSaveBitmap(bitmap: Bitmap) = Unit
 
     override fun onChangeMediaType(mediaType: MediaType) = Unit
+
+    override fun onFileRemoveClick(uri: Uri) = Unit
 }
 

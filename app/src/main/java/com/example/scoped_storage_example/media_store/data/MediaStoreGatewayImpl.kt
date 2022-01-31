@@ -16,7 +16,7 @@ import java.io.IOException
 
 class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
 
-    override suspend fun load(
+    override suspend fun loadMediaFiles(
         mediaType: MediaType
     ): List<MediaFile> = withContext(Dispatchers.IO) {
         val files = mutableListOf<MediaFile>()
@@ -78,7 +78,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
         return@withContext files.reversed()
     }
 
-    override suspend fun savePhoto(fileName: String, bitmap: Bitmap) {
+    override suspend fun savePhoto(fileName: String, bitmap: Bitmap) = withContext(Dispatchers.IO) {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + "." + FileTypes.TYPE_PHOTO)
             put(MediaStore.MediaColumns.MIME_TYPE, FileTypes.MIME_TYPE_PHOTO)
@@ -109,5 +109,12 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             }
             throw it
         }
+        return@withContext
+    }
+
+    override suspend fun removeMediaFile(uri: Uri) = withContext(Dispatchers.IO) {
+        val resolver = context.contentResolver
+        resolver.delete(uri, null, null)
+        return@withContext
     }
 }

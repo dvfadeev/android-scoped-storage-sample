@@ -1,6 +1,7 @@
 package com.example.scoped_storage_example.media_store.ui
 
 import android.graphics.Bitmap
+import android.net.Uri
 import com.example.scoped_storage_example.media_store.data.MediaType
 
 interface MediaStoreComponent {
@@ -14,4 +15,6 @@ interface MediaStoreComponent {
     fun onSaveBitmap(bitmap: Bitmap)
 
     fun onChangeMediaType(mediaType: MediaType)
+
+    fun onFileRemoveClick(uri: Uri)
 }

@@ -25,5 +25,6 @@
     <string name="media_store_type_images">Images</string>
     <string name="media_store_type_videos">Video</string>
     <string name="media_store_type_audio">Audio</string>
+    <string name="media_store_file_remove">Remove</string>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.example.scoped_storage_example.media_store.ui
 
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -50,7 +51,14 @@ class RealMediaStoreComponent(
         onLoadMedia()
     }
 
+    override fun onFileRemoveClick(uri: Uri) {
+        coroutineScope.launch {
+            mediaStore.removeMediaFile(uri)
+            refresh()
+        }
+    }
+
     private suspend fun refresh() {
-        mediaFiles = mediaStore.load(mediaType).map { it.toViewData() }
+        mediaFiles = mediaStore.loadMediaFiles(mediaType).map { it.toViewData() }
     }
 }
