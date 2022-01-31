@@ -63,7 +63,7 @@ private fun AppStorageContent(
     modifier: Modifier = Modifier,
     isInternalStorage: Boolean,
     availableSpace: Long,
-    files: List<FileViewData>,
+    files: List<StorageFileViewData>,
     onToggleStorageClick: () -> Unit,
     onSaveLogClick: () -> Unit,
     onFileOpenClick: (String) -> Unit,
@@ -99,7 +99,7 @@ private fun AppStorageContent(
 @Composable
 private fun FileContent(
     modifier: Modifier = Modifier,
-    file: FileContentViewData?
+    file: StorageFileContentViewData?
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -211,7 +211,7 @@ private fun AppStorageCardItem(
 private fun DirectoriesItem(
     isInternalStorage: Boolean,
     availableSpace: Long,
-    files: List<FileViewData>,
+    files: List<StorageFileViewData>,
     onFileOpenClick: (String) -> Unit,
     onFileRemoveClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -298,7 +298,7 @@ private fun DirectoriesItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FileItem(
-    file: FileViewData,
+    file: StorageFileViewData,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -354,9 +354,9 @@ class FakeAppStorageComponent : AppStorageComponent {
 
     override var availableSpace: Long = 100
 
-    override var files: List<FileViewData> = FileViewData.mocks()
+    override var files: List<StorageFileViewData> = StorageFileViewData.mocks()
 
-    override var selectedFile: FileContentViewData? = null
+    override var selectedFile: StorageFileContentViewData? = null
 
     override var isShowFileContent: Boolean = false
 

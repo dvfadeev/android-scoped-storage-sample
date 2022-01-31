@@ -5,6 +5,8 @@ import android.os.Build
 import android.os.StatFs
 import android.os.storage.StorageManager
 import androidx.core.content.getSystemService
+import com.example.scoped_storage_example.app_storage.data.models.StorageFile
+import com.example.scoped_storage_example.app_storage.data.models.StorageFileContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -32,11 +34,14 @@ class AppStorageGatewayExternal(private val context: Context) : AppStorageGatewa
 
     /**
      * Open external storage file
-     * @return file content in String format
+     * @return storage file content
      * @throws java.io.FileNotFoundException
      */
-    override suspend fun openFile(fileName: String): String {
-        return File(rootDir + fileName).readText()
+    override suspend fun openFile(fileName: String): StorageFileContent {
+        return StorageFileContent(
+            name = fileName,
+            content = File(rootDir + fileName).readText()
+        )
     }
 
     /**
@@ -49,10 +54,10 @@ class AppStorageGatewayExternal(private val context: Context) : AppStorageGatewa
 
     /**
      * Get a list of all external storage files
-     * @return list of all file names
+     * @return list of all storage files
      */
-    override suspend fun getFilesList(): List<String> {
-        return rootFile.listFiles()?.map { it.name } ?: listOf()
+    override suspend fun getFilesList(): List<StorageFile> {
+        return rootFile.listFiles()?.map { it.name }?.map { StorageFile(name = it) } ?: listOf()
     }
 
     /**

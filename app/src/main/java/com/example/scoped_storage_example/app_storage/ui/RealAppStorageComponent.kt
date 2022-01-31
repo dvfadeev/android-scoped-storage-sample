@@ -31,11 +31,11 @@ class RealAppStorageComponent(
 
     override var availableSpace: Long by mutableStateOf(0)
 
-    override var files: List<FileViewData> by mutableStateOf(listOf())
+    override var files: List<StorageFileViewData> by mutableStateOf(listOf())
 
     override var isShowFileContent: Boolean by mutableStateOf(false)
 
-    override var selectedFile: FileContentViewData? by mutableStateOf(null)
+    override var selectedFile: StorageFileContentViewData? by mutableStateOf(null)
 
     init {
         logger.log("Init AppStorageComponent")
@@ -66,10 +66,7 @@ class RealAppStorageComponent(
     override fun onFileOpenClick(fileName: String) {
         coroutineScope.launch {
             isShowFileContent = true
-            selectedFile = FileContentViewData(
-                name = fileName,
-                content = appStorage.openFile(fileName = fileName)
-            )
+            selectedFile = appStorage.openFile(fileName = fileName).toViewData()
             logger.log("File $fileName opened")
         }
     }
@@ -93,7 +90,7 @@ class RealAppStorageComponent(
     private fun refreshFiles() {
         coroutineScope.launch {
             availableSpace = appStorage.getAvailableSpaceMb()
-            files = appStorage.getFilesList().map { FileViewData(name = it) }
+            files = appStorage.getFilesList().map { it.toViewData() }
         }
     }
 
