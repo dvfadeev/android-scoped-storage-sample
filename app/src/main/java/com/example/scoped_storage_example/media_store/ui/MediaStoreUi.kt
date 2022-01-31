@@ -153,8 +153,8 @@ private fun MediaStoreContent(
         mediaFiles?.let {
             val listState = rememberLazyListState()
             LazyColumn(
-                contentPadding = PaddingValues(top = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(top = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .verticalScrollbar(listState, 4.dp, color = MaterialTheme.colors.primary),
                 state = listState
@@ -222,15 +222,18 @@ private fun MediaFileItem(
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxWidth()) {
+    Box(
+        modifier = modifier.fillMaxWidth()
+
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
                 .combinedClickable(
                     onClick = { },
                     onLongClick = { expanded = true }
                 )
+                .padding(start = 8.dp, end = 8.dp, top = 8.dp)
 
         ) {
             Image(
