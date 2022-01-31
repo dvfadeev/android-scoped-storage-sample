@@ -261,6 +261,8 @@ private fun MediaFileItem(
 
                 CaptionText(text = data.type + " " + stringResource(id = R.string.media_store_file))
 
+                CaptionText(text = data.path)
+
                 CaptionText(text = data.size)
 
                 CaptionText(text = data.date)
@@ -300,7 +302,9 @@ fun CaptionText(
     Text(
         text = text,
         color = MaterialTheme.additionalColors.lightText,
-        style = MaterialTheme.typography.caption
+        style = MaterialTheme.typography.caption,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
     )
 }
 

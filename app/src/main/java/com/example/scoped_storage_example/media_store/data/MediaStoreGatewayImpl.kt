@@ -21,15 +21,23 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
     ): List<MediaFile> = withContext(Dispatchers.IO) {
         val files = mutableListOf<MediaFile>()
         val resolver = context.contentResolver
+
+        val pathColumn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Files.FileColumns.RELATIVE_PATH
+        } else {
+            MediaStore.Files.FileColumns.DATA
+        }
+
         val projection = arrayOf(
             MediaStore.Files.FileColumns._ID,
             MediaStore.Files.FileColumns.DISPLAY_NAME,
             MediaStore.Files.FileColumns.MIME_TYPE,
             MediaStore.Files.FileColumns.SIZE,
-            MediaStore.Files.FileColumns.DATE_ADDED
+            MediaStore.Files.FileColumns.DATE_ADDED,
+            pathColumn
         )
 
-        val contentUri = when (mediaType) {
+        val uriContent = when (mediaType) {
             MediaType.All -> MediaStore.Files.getContentUri("external")
             MediaType.Images -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             MediaType.Videos -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -37,24 +45,27 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
         }
 
         resolver.query(
-            contentUri,
+            uriContent,
             projection,
             null,
             null,
             null
         )?.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-            val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
-            val typeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE)
-            val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
-            val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)
+            val idColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
+            val nameColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
+            val typeColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE)
+            val sizeColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
+            val dateColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)
+            val pathColumnIndex = cursor.getColumnIndexOrThrow(pathColumn)
+
 
             while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val name = cursor.getString(nameColumn)
-                val type = cursor.getString(typeColumn).split(File.separator).first()
-                val sizeKb = cursor.getInt(sizeColumn) / 1024
-                val date = cursor.getString(dateColumn)
+                val id = cursor.getLong(idColumnIndex)
+                val name = cursor.getString(nameColumnIndex)
+                val type = cursor.getString(typeColumnIndex).split(File.separator).first()
+                val sizeKb = cursor.getInt(sizeColumnIndex) / 1024
+                val date = cursor.getString(dateColumnIndex)
+                val path = cursor.getString(pathColumnIndex)
 
                 val uriColumn = when (type) {
                     "image" -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -71,7 +82,8 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                     name = name,
                     type = type,
                     sizeKb = sizeKb,
-                    date = date.toLong() * 1000
+                    date = date.toLong() * 1000,
+                    path = path ?: ""
                 )
             }
         }

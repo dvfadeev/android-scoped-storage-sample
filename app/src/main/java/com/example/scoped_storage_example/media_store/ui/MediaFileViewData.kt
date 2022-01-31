@@ -12,7 +12,8 @@ data class MediaFileViewData(
     val name: String,
     val type: String,
     val size: String,
-    val date: String
+    val date: String,
+    val path: String
 ) {
     companion object {
         val MOCK = MediaFileViewData(
@@ -20,7 +21,8 @@ data class MediaFileViewData(
             name = "file.txt",
             type = "text",
             size = "51KB",
-            date = "12"
+            date = "12",
+            path = "/pictures/file.txt"
         )
     }
 }
@@ -33,6 +35,7 @@ fun MediaFile.toViewData(): MediaFileViewData {
         name = name,
         type = type,
         size = sizeKb.toString() + "KB",
-        date = dateFormatter.format(Date(date))
+        date = dateFormatter.format(Date(date)),
+        path = "path: $path"
     )
 }
