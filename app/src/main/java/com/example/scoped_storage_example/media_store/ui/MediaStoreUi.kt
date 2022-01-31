@@ -1,6 +1,10 @@
 package com.example.scoped_storage_example.media_store.ui
 
 import android.app.Activity
+import android.graphics.Bitmap
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -102,6 +106,7 @@ private fun MediaStorePermissionScreen(
         MediaStoreContent(
             mediaType = component.mediaType,
             mediaFiles = component.mediaFiles,
+            onSaveBitmap = component::onSaveBitmap,
             onChangeMediaType = component::onChangeMediaType,
             modifier = modifier
         )
@@ -112,19 +117,29 @@ private fun MediaStorePermissionScreen(
 private fun MediaStoreContent(
     mediaType: MediaType,
     mediaFiles: List<MediaFileViewData>?,
+    onSaveBitmap: (Bitmap) -> Unit,
     onChangeMediaType: (MediaType) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { photo ->
+        photo?.let {
+            onSaveBitmap(it)
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(top = 20.dp)
     ) {
+        ControlButton(
+            text = stringResource(id = R.string.media_store_take_photo),
+            onClick = { launcher.launch() },
+            modifier = Modifier.align(CenterHorizontally)
+        )
+
         MediaTypeSelector(
             mediaType = mediaType,
             onChangeMediaType = {
-                //  Coil.imageLoader(context).memoryCache.clear()
                 onChangeMediaType(it)
             },
             modifier = Modifier.align(CenterHorizontally)
@@ -262,6 +277,7 @@ private fun MediaStoreUiPreview() {
         MediaStoreContent(
             component.mediaType,
             component.mediaFiles!!,
+            component::onSaveBitmap,
             component::onChangeMediaType
         )
     }
@@ -276,6 +292,8 @@ class FakeMediaStoreComponent : MediaStoreComponent {
     }
 
     override fun onLoadMedia() = Unit
+
+    override fun onSaveBitmap(bitmap: Bitmap) = Unit
 
     override fun onChangeMediaType(mediaType: MediaType) = Unit
 }

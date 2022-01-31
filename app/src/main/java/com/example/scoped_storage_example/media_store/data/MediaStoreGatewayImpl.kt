@@ -1,16 +1,23 @@
 package com.example.scoped_storage_example.media_store.data
 
 import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
+import com.example.scoped_storage_example.core.data.gateway.FileTypes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.IOException
 
 class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
 
     override suspend fun load(
-        type: MediaType
+        mediaType: MediaType
     ): List<MediaFile> = withContext(Dispatchers.IO) {
         val files = mutableListOf<MediaFile>()
         val resolver = context.contentResolver
@@ -22,7 +29,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             MediaStore.Files.FileColumns.DATE_ADDED
         )
 
-        val contentUri = when (type) {
+        val contentUri = when (mediaType) {
             MediaType.All -> MediaStore.Files.getContentUri("external")
             MediaType.Images -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             MediaType.Videos -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -69,5 +76,38 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             }
         }
         return@withContext files.reversed()
+    }
+
+    override suspend fun savePhoto(fileName: String, bitmap: Bitmap) {
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + "." + FileTypes.TYPE_PHOTO)
+            put(MediaStore.MediaColumns.MIME_TYPE, FileTypes.MIME_TYPE_PHOTO)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+            } else {
+                put(MediaStore.Images.Media.DATA, Environment.DIRECTORY_PICTURES)
+            }
+        }
+
+        var uri: Uri? = null
+
+        runCatching {
+            with(context.contentResolver) {
+                insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)?.also {
+                    uri = it
+                    openOutputStream(it)?.use { stream ->
+                        if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)) {
+                            throw IOException("Failed to save bitmap!")
+                        }
+                    } ?: throw IOException("Failed to create new MediaStore record!")
+                }
+            }
+        }.getOrElse {
+            uri?.let { orphanUri ->
+                context.contentResolver.delete(orphanUri, null, null)
+            }
+            throw it
+        }
     }
 }
