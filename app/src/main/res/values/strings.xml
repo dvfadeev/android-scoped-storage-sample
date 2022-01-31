@@ -26,5 +26,15 @@
     <string name="media_store_type_videos">Video</string>
     <string name="media_store_type_audio">Audio</string>
     <string name="media_store_file_remove">Remove</string>
+    <string name="media_store_file_name">Name:</string>
+    <string name="media_store_file_title">Title:</string>
+    <string name="media_store_file_path">Path:</string>
+    <string name="media_store_file_mime_type">Mime type:</string>
+    <string name="media_store_file_size">Size:</string>
+    <string name="media_store_file_date_added">Date added:</string>
+    <string name="media_store_file_date_taken">Date taken:</string>
+    <string name="media_store_file_description">Description:</string>
+    <string name="media_store_file_resolution">Resolution:</string>
+    <string name="media_store_file_duration">Duration:</string>
 
 </resources>

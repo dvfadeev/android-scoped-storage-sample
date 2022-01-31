@@ -10,11 +10,17 @@ interface MediaStoreComponent {
 
     var mediaFiles: List<MediaFileViewData>?
 
+    var selectedMediaFIle: DetailedImageFileViewData?
+
+    var isShowImageFileContent: Boolean
+
     fun onLoadMedia()
 
     fun onSaveBitmap(bitmap: Bitmap)
 
     fun onChangeMediaType(mediaType: MediaType)
+
+    fun onFileClick(uri: Uri)
 
     fun onFileRemoveClick(uri: Uri)
 }

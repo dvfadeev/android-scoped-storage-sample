@@ -11,6 +11,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,22 +23,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.decode.VideoFrameDecoder
 import com.example.scoped_storage_example.R
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
 import com.example.scoped_storage_example.core.ui.theme.additionalColors
-import com.example.scoped_storage_example.core.ui.widgets.ControlButton
-import com.example.scoped_storage_example.core.ui.widgets.SelectableButton
-import com.example.scoped_storage_example.core.ui.widgets.Toolbar
-import com.example.scoped_storage_example.core.ui.widgets.verticalScrollbar
+import com.example.scoped_storage_example.core.ui.widgets.*
 import com.example.scoped_storage_example.media_store.data.MediaType
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionRequired
@@ -106,13 +106,31 @@ private fun MediaStorePermissionScreen(
     ) {
         onLoadMedia.invoke()
 
-        MediaStoreContent(
-            mediaType = component.mediaType,
-            mediaFiles = component.mediaFiles,
-            onSaveBitmap = component::onSaveBitmap,
-            onChangeMediaType = component::onChangeMediaType,
-            onFileRemoveClick = component::onFileRemoveClick,
-            modifier = modifier
+        val scrollState = rememberLazyListState()
+
+        SlideAnimationScreen(
+            firstScreen = {
+                MediaStoreContent(
+                    mediaType = component.mediaType,
+                    mediaFiles = component.mediaFiles,
+                    onSaveBitmap = component::onSaveBitmap,
+                    onChangeMediaType = component::onChangeMediaType,
+                    onFileClick = component::onFileClick,
+                    onFileRemoveClick = component::onFileRemoveClick,
+                    scrollState = scrollState,
+                    modifier = modifier
+                )
+            },
+            secondScreen = {
+                component.selectedMediaFIle?.let {
+                    FileContent(file = it)
+                } ?: run {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Center))
+                    }
+                }
+            },
+            isShowSecondScreen = component.isShowImageFileContent
         )
     }
 }
@@ -123,7 +141,9 @@ private fun MediaStoreContent(
     mediaFiles: List<MediaFileViewData>?,
     onSaveBitmap: (Bitmap) -> Unit,
     onChangeMediaType: (MediaType) -> Unit,
+    onFileClick: (Uri) -> Unit,
     onFileRemoveClick: (Uri) -> Unit,
+    scrollState: LazyListState,
     modifier: Modifier = Modifier
 ) {
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { photo ->
@@ -151,17 +171,17 @@ private fun MediaStoreContent(
         )
 
         mediaFiles?.let {
-            val listState = rememberLazyListState()
             LazyColumn(
                 contentPadding = PaddingValues(top = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
-                    .verticalScrollbar(listState, 4.dp, color = MaterialTheme.colors.primary),
-                state = listState
+                    .verticalScrollbar(scrollState, 4.dp, color = MaterialTheme.colors.primary),
+                state = scrollState
             ) {
                 items(mediaFiles) {
                     MediaFileItem(
                         data = it,
+                        onFileClick = onFileClick,
                         onFileRemoveClick = onFileRemoveClick
                     )
                 }
@@ -174,6 +194,59 @@ private fun MediaStoreContent(
     }
 }
 
+@Composable
+private fun FileContent(
+    modifier: Modifier = Modifier,
+    file: DetailedImageFileViewData
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 20.dp)
+    ) {
+        Card(
+            backgroundColor = MaterialTheme.colors.primary,
+            elevation = 7.dp,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(all = 16.dp)
+            ) {
+                FileField(title = stringResource(id = R.string.media_store_file_name), text = file.name)
+                FileField(title = stringResource(id = R.string.media_store_file_title), text = file.title)
+                FileField(title = stringResource(id = R.string.media_store_file_path), text = file.path)
+                FileField(title = stringResource(id = R.string.media_store_file_mime_type), text = file.mimeType)
+                FileField(title = stringResource(id = R.string.media_store_file_size), text = file.size)
+                FileField(title = stringResource(id = R.string.media_store_file_date_added), text = file.dateAdded)
+                FileField(title = stringResource(id = R.string.media_store_file_date_taken), text = file.dateTaken)
+                FileField(title = stringResource(id = R.string.media_store_file_description), text = file.description)
+
+                file.resolution?.let {
+                    FileField(title = stringResource(id = R.string.media_store_file_resolution), text = it)
+                }
+
+                file.duration?.let {
+                    FileField(title = stringResource(id = R.string.media_store_file_duration), text = it)
+                }
+            }
+        }
+
+        val conf = LocalConfiguration.current
+        val size = conf.screenWidthDp.dp - 64.dp
+
+        ImageViewer(
+            uri = file.uri,
+            size = size,
+            type = file.mimeType,
+            modifier = Modifier
+                .padding(horizontal = 32.dp, vertical = 8.dp)
+                .align(CenterHorizontally)
+        )
+    }
+}
 
 @Composable
 private fun MediaTypeSelector(
@@ -216,10 +289,10 @@ private fun MediaTypeSelector(
 @Composable
 private fun MediaFileItem(
     data: MediaFileViewData,
+    onFileClick: (Uri) -> Unit,
     onFileRemoveClick: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
 
     Box(
@@ -230,29 +303,19 @@ private fun MediaFileItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .combinedClickable(
-                    onClick = { },
+                    onClick = {
+                        data.uri?.let {
+                            onFileClick(it)
+                        }
+                    },
                     onLongClick = { expanded = true }
                 )
                 .padding(start = 8.dp, end = 8.dp, top = 8.dp)
-
         ) {
-            Image(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                painter = rememberImagePainter(
-                    data.uri,
-                    builder = {
-                        with(LocalDensity.current) { size(72.dp.roundToPx()) }
-                        placeholder(R.color.cardview_dark_background)
-                        if (data.type == "video") {
-                            decoder(VideoFrameDecoder(context))
-                            crossfade(true)
-                        }
-                    }
-                ),
-                contentScale = ContentScale.Crop,
-                contentDescription = null
+            ImageViewer(
+                uri = data.uri,
+                size = 72.dp,
+                type = data.type
             )
 
             Column(modifier = Modifier.padding(start = 8.dp)) {
@@ -263,8 +326,6 @@ private fun MediaFileItem(
                 )
 
                 CaptionText(text = data.type + " " + stringResource(id = R.string.media_store_file))
-
-                CaptionText(text = data.path)
 
                 CaptionText(text = data.size)
 
@@ -299,6 +360,61 @@ private fun MediaFileItem(
 }
 
 @Composable
+fun FileField(
+    title: String,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
+    ) {
+        Text(
+            text = title,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.caption
+        )
+    }
+}
+
+@Composable
+fun ImageViewer(
+    uri: Uri?,
+    size: Dp,
+    type: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    Image(
+        modifier = modifier
+            .size(size)
+            .clip(RoundedCornerShape(8.dp)),
+        painter = rememberImagePainter(
+            uri,
+            builder = {
+                with(LocalDensity.current) { size(size.roundToPx()) }
+                placeholder(R.color.cardview_dark_background)
+                if (type.startsWith("video")) {
+                    decoder(VideoFrameDecoder(context))
+                    crossfade(true)
+                }
+            }
+        ),
+        contentScale = ContentScale.Fit,
+        contentDescription = null
+    )
+}
+
+@Composable
 fun CaptionText(
     text: String
 ) {
@@ -321,7 +437,9 @@ private fun MediaStoreUiPreview() {
             component.mediaFiles!!,
             component::onSaveBitmap,
             component::onChangeMediaType,
-            component::onFileRemoveClick
+            component::onFileClick,
+            component::onFileRemoveClick,
+            rememberLazyListState()
         )
     }
 }
@@ -334,11 +452,17 @@ class FakeMediaStoreComponent : MediaStoreComponent {
         MediaFileViewData.MOCK
     }
 
+    override var selectedMediaFIle: DetailedImageFileViewData? = null
+
+    override var isShowImageFileContent: Boolean = false
+
     override fun onLoadMedia() = Unit
 
     override fun onSaveBitmap(bitmap: Bitmap) = Unit
 
     override fun onChangeMediaType(mediaType: MediaType) = Unit
+
+    override fun onFileClick(uri: Uri) = Unit
 
     override fun onFileRemoveClick(uri: Uri) = Unit
 }

@@ -26,8 +26,13 @@ class RealMediaStoreComponent(
 
     override var mediaFiles: List<MediaFileViewData>? by mutableStateOf(null)
 
+    override var selectedMediaFIle: DetailedImageFileViewData? by mutableStateOf(null)
+
+    override var isShowImageFileContent: Boolean by mutableStateOf(false)
+
     init {
         logger.log("Init AppStorageComponent")
+        backPressedHandler.register(::onBackPressed)
     }
 
     override fun onLoadMedia() {
@@ -40,7 +45,7 @@ class RealMediaStoreComponent(
     override fun onSaveBitmap(bitmap: Bitmap) {
         coroutineScope.launch {
             val fileName = "photo " + currentTime.currentTimeString
-            mediaStore.savePhoto(fileName, bitmap)
+            mediaStore.writeImage(fileName, bitmap)
             logger.log("$fileName saved")
             refresh()
         }
@@ -49,6 +54,16 @@ class RealMediaStoreComponent(
     override fun onChangeMediaType(mediaType: MediaType) {
         this.mediaType = mediaType
         onLoadMedia()
+    }
+
+    override fun onFileClick(uri: Uri) {
+        coroutineScope.launch {
+            mediaStore.openMediaFile(uri)?.let {
+                selectedMediaFIle = it.toViewData()
+                isShowImageFileContent = true
+                logger.log("Image ${it.name} loaded")
+            }
+        }
     }
 
     override fun onFileRemoveClick(uri: Uri) {
@@ -60,5 +75,15 @@ class RealMediaStoreComponent(
 
     private suspend fun refresh() {
         mediaFiles = mediaStore.loadMediaFiles(mediaType).map { it.toViewData() }
+    }
+
+    private fun onBackPressed(): Boolean {
+        return if (isShowImageFileContent) {
+            isShowImageFileContent = false
+            logger.log("Media file content viewer closed")
+            true
+        } else {
+            false
+        }
     }
 }

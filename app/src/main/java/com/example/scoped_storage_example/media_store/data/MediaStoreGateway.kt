@@ -7,7 +7,9 @@ interface MediaStoreGateway {
 
     suspend fun loadMediaFiles(mediaType: MediaType = MediaType.All): List<MediaFile>
 
-    suspend fun savePhoto(fileName: String, bitmap: Bitmap)
+    suspend fun writeImage(fileName: String, bitmap: Bitmap)
+
+    suspend fun openMediaFile(uri: Uri): DetailedMediaFile?
 
     suspend fun removeMediaFile(uri: Uri)
 }

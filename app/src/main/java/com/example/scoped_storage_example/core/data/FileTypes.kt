@@ -1,4 +1,4 @@
-package com.example.scoped_storage_example.core.data.gateway
+package com.example.scoped_storage_example.core.data
 
 object FileTypes {
 
