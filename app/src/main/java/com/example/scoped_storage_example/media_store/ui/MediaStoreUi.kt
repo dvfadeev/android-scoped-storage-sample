@@ -210,7 +210,7 @@ private fun FileContent(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(all = 16.dp)

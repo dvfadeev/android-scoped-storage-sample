@@ -4,7 +4,9 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -75,8 +77,10 @@ private fun FilePickerContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
             .fillMaxSize()
-            .padding(top = 20.dp)
+            .verticalScroll(rememberScrollState())
     ) {
+        Spacer(modifier = Modifier.height(20.dp))
+
         CustomCard(modifier = Modifier.padding(horizontal = 16.dp)) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -133,7 +137,6 @@ private fun FilePickerContent(
                     }
                 },
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
 
@@ -162,7 +165,8 @@ private fun PageSwitcher(
             isSelected = false,
             isEnabled = isPreviousEnabled,
             shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp),
-            onClick = onPreviousClick
+            onClick = onPreviousClick,
+            modifier = Modifier.weight(1f)
         )
 
         SelectableButton(
@@ -170,7 +174,8 @@ private fun PageSwitcher(
             isSelected = false,
             isEnabled = isNextEnabled,
             shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp),
-            onClick = onNextClick
+            onClick = onNextClick,
+            modifier = Modifier.weight(1f)
         )
     }
 }
@@ -180,15 +185,16 @@ private fun DocumentFileItem(
     data: DocumentFileViewData,
     modifier: Modifier = Modifier,
 ) {
-    CustomCard(modifier = modifier.padding(horizontal = 16.dp)) {
+    CustomCard(modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp)) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(16.dp)
         ) {
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_name), text = data.name)
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_id), text = data.id)
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_flags), text = data.flags)
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_mime_type), text = data.mimeType)
+            DocumentFileField(title = stringResource(id = R.string.file_picker_file_size), text = data.sizeKb)
 
             data.dateModified?.let {
                 DocumentFileField(title = stringResource(id = R.string.file_picker_file_date_modified), text = it)
