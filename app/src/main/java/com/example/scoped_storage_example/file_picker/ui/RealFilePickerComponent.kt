@@ -1,6 +1,9 @@
 package com.example.scoped_storage_example.file_picker.ui
 
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
 import com.example.scoped_storage_example.core.data.gateway.logger.Logger
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
@@ -15,14 +18,25 @@ class RealFilePickerComponent(
 
     private val coroutineScope = componentCoroutineScope()
 
+    override var documentFiles: List<DocumentFileViewData>? by mutableStateOf(null)
+
     init {
         logger.log("Init FilePicker")
     }
 
     override fun onOpenFile(uri: Uri) {
         coroutineScope.launch {
-            val file = mediaStore.openDocument(uri)
-            logger.log("File opened")
+            mediaStore.openDocument(uri)?.let {
+                documentFiles = listOf(it.toViewData())
+                logger.log("File opened")
+            }
+        }
+    }
+
+    override fun onOpenFiles(uris: List<Uri>) {
+        coroutineScope.launch {
+            documentFiles = mediaStore.openDocuments(uris).map { it.toViewData() }
+            logger.log("Files opened")
         }
     }
 }

@@ -57,4 +57,16 @@ class FilePickerGatewayImpl(private val context: Context) : FilePickerGateway {
 
         return@withContext resultImage
     }
+
+    override suspend fun openDocuments(uris: List<Uri>): List<DocumentFile> {
+        val result = mutableListOf<DocumentFile>()
+
+        uris.forEach {
+            openDocument(it)?.let { file ->
+                result.add(file)
+            }
+        }
+
+        return result
+    }
 }

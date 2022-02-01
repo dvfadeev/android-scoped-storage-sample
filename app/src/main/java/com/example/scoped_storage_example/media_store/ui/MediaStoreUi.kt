@@ -386,35 +386,6 @@ fun FileField(
 }
 
 @Composable
-fun ImageViewer(
-    uri: Uri?,
-    size: Dp,
-    type: String,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-
-    Image(
-        modifier = modifier
-            .size(size)
-            .clip(RoundedCornerShape(8.dp)),
-        painter = rememberImagePainter(
-            uri,
-            builder = {
-                with(LocalDensity.current) { size(size.roundToPx()) }
-                placeholder(R.color.cardview_dark_background)
-                if (type.startsWith("video")) {
-                    decoder(VideoFrameDecoder(context))
-                    crossfade(true)
-                }
-            }
-        ),
-        contentScale = ContentScale.Fit,
-        contentDescription = null
-    )
-}
-
-@Composable
 fun CaptionText(
     text: String
 ) {

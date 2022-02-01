@@ -39,5 +39,18 @@
 
     <!-- FilePicker -->
     <string name="file_picker_title">File Picker</string>
+    <string name="file_picker_launch">Open</string>
+    <string name="file_picker_launch_text">Press button to open native file picker</string>
+    <string name="file_picker_launch_multiply_text">Press button to open native multiply files picker (hold to select file)</string>
+    <string name="file_picker_previous">Previous</string>
+    <string name="file_picker_next">Next</string>
+    <string name="file_picker_file_name">Name:</string>
+    <string name="file_picker_file_id">Id:</string>
+    <string name="file_picker_file_flags">Flags:</string>
+    <string name="file_picker_file_mime_type">Mime type:</string>
+    <string name="file_picker_file_size">Size</string>
+    <string name="file_picker_file_date_modified">Date modified:</string>
+    <string name="file_picker_file_icon">Icon:</string>
+    <string name="file_picker_file_summary">Summary:</string>
 
 </resources>

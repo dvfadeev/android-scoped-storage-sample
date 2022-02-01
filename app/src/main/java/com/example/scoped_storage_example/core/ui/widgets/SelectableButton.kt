@@ -17,11 +17,13 @@ fun SelectableButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     shape: RoundedCornerShape = RoundedCornerShape(0.dp),
+    isEnabled: Boolean = true,
 ) {
     OutlinedButton(
         onClick = onClick,
         shape = shape,
         modifier = modifier,
+        enabled = isEnabled,
         colors = if (isSelected) {
             ButtonDefaults.outlinedButtonColors(
                 backgroundColor = MaterialTheme.colors.primary,
