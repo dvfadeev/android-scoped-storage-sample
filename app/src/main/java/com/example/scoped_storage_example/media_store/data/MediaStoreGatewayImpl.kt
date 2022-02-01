@@ -32,7 +32,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
         val resolver = context.contentResolver
         val files = mutableListOf<MediaFile>()
 
-        val projection = arrayOf(
+        val projection = arrayOf( // To save resources, we select only the required fields
             MediaStore.Files.FileColumns._ID,
             MediaStore.Files.FileColumns.DISPLAY_NAME,
             MediaStore.Files.FileColumns.MIME_TYPE,
@@ -64,8 +64,8 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                 val id = cursor.getLong(idColumnIndex)
                 val name = cursor.getString(nameColumnIndex)
                 val type = cursor.getString(typeColumnIndex).split(File.separator).first()
-                val sizeKb = cursor.getInt(sizeColumnIndex) / 1024
-                val date = cursor.getString(dateColumnIndex)
+                val sizeKb = cursor.getLong(sizeColumnIndex) / 1024
+                val date = cursor.getLong(dateColumnIndex) * 1000
 
                 val uriColumn = when (type) {
                     "image" -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -82,7 +82,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                     name = name,
                     type = type,
                     sizeKb = sizeKb,
-                    date = date.toLong() * 1000
+                    date = date
                 )
             }
         }
@@ -141,23 +141,9 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             MediaStore.Files.FileColumns.DATA
         }
 
-        val projection = arrayOf(
-            MediaStore.Files.FileColumns.DISPLAY_NAME,
-            MediaStore.Files.FileColumns.TITLE,
-            pathColumn,
-            MediaStore.Files.FileColumns.MIME_TYPE,
-            MediaStore.Files.FileColumns.SIZE,
-            MediaStore.Files.FileColumns.DATE_ADDED,
-            MediaStore.Files.FileColumns.HEIGHT,
-            MediaStore.Files.FileColumns.WIDTH,
-            MediaStore.Images.ImageColumns.DATE_TAKEN,
-            MediaStore.Images.ImageColumns.DESCRIPTION,
-            MediaStore.Video.VideoColumns.DURATION
-        )
-
         resolver.query(
             uri,
-            projection,
+            null, // All fields
             null,
             null,
             null
@@ -169,22 +155,22 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             val path = cursor.getString(cursor.getColumnIndexOrThrow(pathColumn))
             val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE))
             val sizeKb = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)) / 1024
-            val dateAdded = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED))
+            val dateAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)) * 1000
             val height = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT))
             val width = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH))
-            val dateTaken = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN))
+            val dateTaken = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN))
             val description = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DESCRIPTION))
             val duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DURATION))
 
             resultImage = DetailedMediaFile(
                 uri = uri,
                 name = name,
-                title = title,
+                title = title ?: "",
                 path = path ?: "unknown",
                 mimeType = mimeType ?: "unknown",
                 sizeKb = sizeKb,
-                dateAdded = dateAdded.toLong() * 1000,
-                dateTaken = dateTaken.toLong(),
+                dateAdded = dateAdded,
+                dateTaken = dateTaken,
                 description = description ?: "empty",
                 height = height,
                 width = width,
