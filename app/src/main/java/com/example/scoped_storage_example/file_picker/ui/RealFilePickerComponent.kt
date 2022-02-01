@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
 import com.example.scoped_storage_example.core.data.gateway.logger.Logger
+import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
 import com.example.scoped_storage_example.file_picker.data.FilePickerGateway
 import kotlinx.coroutines.launch
@@ -18,10 +19,16 @@ class RealFilePickerComponent(
 
     private val coroutineScope = componentCoroutineScope()
 
+    override var filter: TypeFilter by mutableStateOf(TypeFilter.All)
+
     override var documentFiles: List<DocumentFileViewData>? by mutableStateOf(null)
 
     init {
         logger.log("Init FilePicker")
+    }
+
+    override fun onChangeFilter(filter: TypeFilter) {
+        this.filter = filter
     }
 
     override fun onOpenFile(uri: Uri) {

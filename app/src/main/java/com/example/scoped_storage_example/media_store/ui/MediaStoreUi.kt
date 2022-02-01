@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,24 +20,19 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
-import coil.decode.VideoFrameDecoder
 import com.example.scoped_storage_example.R
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
 import com.example.scoped_storage_example.core.ui.theme.additionalColors
 import com.example.scoped_storage_example.core.ui.widgets.*
-import com.example.scoped_storage_example.media_store.data.models.MediaType
+import com.example.scoped_storage_example.core.utils.AvailableFilters
+import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionRequired
 import com.google.accompanist.permissions.rememberPermissionState
@@ -111,10 +105,10 @@ private fun MediaStorePermissionScreen(
         SlideAnimationScreen(
             firstScreen = {
                 MediaStoreContent(
-                    mediaType = component.mediaType,
+                    filter = component.filter,
                     mediaFiles = component.mediaFiles,
                     onSaveBitmap = component::onSaveBitmap,
-                    onChangeMediaType = component::onChangeMediaType,
+                    onChangeMediaType = component::onChangeFilter,
                     onFileClick = component::onFileClick,
                     onFileRemoveClick = component::onFileRemoveClick,
                     scrollState = scrollState,
@@ -137,10 +131,10 @@ private fun MediaStorePermissionScreen(
 
 @Composable
 private fun MediaStoreContent(
-    mediaType: MediaType,
+    filter: TypeFilter,
     mediaFiles: List<MediaFileViewData>?,
     onSaveBitmap: (Bitmap) -> Unit,
-    onChangeMediaType: (MediaType) -> Unit,
+    onChangeMediaType: (TypeFilter) -> Unit,
     onFileClick: (Uri) -> Unit,
     onFileRemoveClick: (Uri) -> Unit,
     scrollState: LazyListState,
@@ -163,8 +157,8 @@ private fun MediaStoreContent(
         )
 
         MediaTypeSelector(
-            mediaType = mediaType,
-            onChangeMediaType = {
+            filter = filter,
+            onChangeFilter = {
                 onChangeMediaType(it)
             },
             modifier = Modifier.align(CenterHorizontally)
@@ -250,38 +244,34 @@ private fun FileContent(
 
 @Composable
 private fun MediaTypeSelector(
-    mediaType: MediaType,
-    onChangeMediaType: (MediaType) -> Unit,
+    filter: TypeFilter,
+    onChangeFilter: (TypeFilter) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.height(IntrinsicSize.Min)
     ) {
-        SelectableButton(
-            text = stringResource(id = R.string.media_store_type_all),
-            isSelected = mediaType == MediaType.All,
-            onClick = { onChangeMediaType(MediaType.All) },
-            shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
-        )
+        AvailableFilters.list.forEach {
 
-        SelectableButton(
-            text = stringResource(id = R.string.media_store_type_images),
-            isSelected = mediaType == MediaType.Images,
-            onClick = { onChangeMediaType(MediaType.Images) }
-        )
+            val shape = when (it) {
+                AvailableFilters.list.first() -> {
+                    RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
+                }
+                AvailableFilters.list.last() -> {
+                    RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
+                }
+                else -> {
+                    RoundedCornerShape(0.dp)
+                }
+            }
 
-        SelectableButton(
-            text = stringResource(id = R.string.media_store_type_videos),
-            isSelected = mediaType == MediaType.Videos,
-            onClick = { onChangeMediaType(MediaType.Videos) }
-        )
-
-        SelectableButton(
-            text = stringResource(id = R.string.media_store_type_audio),
-            isSelected = mediaType == MediaType.Audio,
-            onClick = { onChangeMediaType(MediaType.Audio) },
-            shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
-        )
+            SelectableButton(
+                text = stringResource(id = it.resource),
+                isSelected = filter == it,
+                onClick = { onChangeFilter(it) },
+                shape = shape
+            )
+        }
     }
 }
 
@@ -404,10 +394,10 @@ private fun MediaStoreUiPreview() {
     AppTheme {
         val component = FakeMediaStoreComponent()
         MediaStoreContent(
-            component.mediaType,
+            component.filter,
             component.mediaFiles!!,
             component::onSaveBitmap,
-            component::onChangeMediaType,
+            component::onChangeFilter,
             component::onFileClick,
             component::onFileRemoveClick,
             rememberLazyListState()
@@ -417,7 +407,7 @@ private fun MediaStoreUiPreview() {
 
 class FakeMediaStoreComponent : MediaStoreComponent {
 
-    override var mediaType: MediaType = MediaType.All
+    override var filter: TypeFilter = TypeFilter.All
 
     override var mediaFiles: List<MediaFileViewData>? = List(5) {
         MediaFileViewData.MOCK
@@ -431,7 +421,7 @@ class FakeMediaStoreComponent : MediaStoreComponent {
 
     override fun onSaveBitmap(bitmap: Bitmap) = Unit
 
-    override fun onChangeMediaType(mediaType: MediaType) = Unit
+    override fun onChangeFilter(filter: TypeFilter) = Unit
 
     override fun onFileClick(uri: Uri) = Unit
 

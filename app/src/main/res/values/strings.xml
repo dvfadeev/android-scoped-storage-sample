@@ -21,10 +21,6 @@
     <string name="media_store_permission_request">To open media storage u have to grant read external storage permission</string>
     <string name="media_store_file">file</string>
     <string name="media_store_take_photo">Take photo</string>
-    <string name="media_store_type_all">All</string>
-    <string name="media_store_type_images">Images</string>
-    <string name="media_store_type_videos">Video</string>
-    <string name="media_store_type_audio">Audio</string>
     <string name="media_store_file_remove">Remove</string>
     <string name="media_store_file_name">Name:</string>
     <string name="media_store_file_title">Title:</string>
@@ -42,6 +38,7 @@
     <string name="file_picker_launch">Open</string>
     <string name="file_picker_launch_text">Press button to open native file picker</string>
     <string name="file_picker_launch_multiply_text">Press button to open native multiply files picker (hold to select file)</string>
+    <string name="file_picker_filter_text">You can change the type of selected files</string>
     <string name="file_picker_previous">Previous</string>
     <string name="file_picker_next">Next</string>
     <string name="file_picker_file_name">Name:</string>
@@ -52,5 +49,12 @@
     <string name="file_picker_file_date_modified">Date modified:</string>
     <string name="file_picker_file_icon">Icon:</string>
     <string name="file_picker_file_summary">Summary:</string>
+
+    <!-- Filter -->
+    <string name="filter_title">Filter</string>
+    <string name="filter_all">All</string>
+    <string name="filter_images">Images</string>
+    <string name="filter_videos">Video</string>
+    <string name="filter_audio">Audio</string>
 
 </resources>

@@ -9,9 +9,9 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import com.example.scoped_storage_example.core.data.FileTypes
+import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.example.scoped_storage_example.media_store.data.models.DetailedMediaFile
 import com.example.scoped_storage_example.media_store.data.models.MediaFile
-import com.example.scoped_storage_example.media_store.data.models.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -27,7 +27,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
      * @return list of MediaFile models
      */
     override suspend fun loadMediaFiles(
-        mediaType: MediaType
+        filter: TypeFilter
     ): List<MediaFile> = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         val files = mutableListOf<MediaFile>()
@@ -40,11 +40,11 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             MediaStore.Files.FileColumns.DATE_ADDED
         )
 
-        val uriContent = when (mediaType) {
-            MediaType.All -> MediaStore.Files.getContentUri("external")
-            MediaType.Images -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            MediaType.Videos -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-            MediaType.Audio -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val uriContent = when (filter) {
+            TypeFilter.All -> MediaStore.Files.getContentUri("external")
+            TypeFilter.Images -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            TypeFilter.Videos -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            TypeFilter.Audio -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         }
 
         resolver.query(

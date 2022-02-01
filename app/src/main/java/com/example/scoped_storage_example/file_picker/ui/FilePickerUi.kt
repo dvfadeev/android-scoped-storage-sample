@@ -7,12 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +22,8 @@ import com.example.scoped_storage_example.core.ui.widgets.ControlButton
 import com.example.scoped_storage_example.core.ui.widgets.ImageViewer
 import com.example.scoped_storage_example.core.ui.widgets.SelectableButton
 import com.example.scoped_storage_example.core.ui.widgets.Toolbar
+import com.example.scoped_storage_example.core.utils.AvailableFilters
+import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -47,7 +45,9 @@ fun FilePickerUi(
         content = {
             FilePickerContent(
                 modifier = Modifier.padding(it),
+                filter = component.filter,
                 documentFiles = component.documentFiles,
+                onChangeFilter = component::onChangeFilter,
                 onOpenFile = component::onOpenFile,
                 onOpenFiles = component::onOpenFiles
             )
@@ -59,7 +59,9 @@ fun FilePickerUi(
 @Composable
 private fun FilePickerContent(
     modifier: Modifier = Modifier,
+    filter: TypeFilter,
     documentFiles: List<DocumentFileViewData>?,
+    onChangeFilter: (TypeFilter) -> Unit,
     onOpenFile: (Uri) -> Unit,
     onOpenFiles: (List<Uri>) -> Unit
 ) {
@@ -68,7 +70,6 @@ private fun FilePickerContent(
             onOpenFile(uri)
         }
     }
-
     val multiplePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         onOpenFiles(uris)
     }
@@ -79,7 +80,13 @@ private fun FilePickerContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        FilterSelector(
+            filter = filter,
+            onChangeFilter = onChangeFilter,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
 
         CustomCard(modifier = Modifier.padding(horizontal = 16.dp)) {
             Row(
@@ -94,7 +101,7 @@ private fun FilePickerContent(
                 )
                 ControlButton(
                     text = stringResource(id = R.string.file_picker_launch),
-                    onClick = { pickerLauncher.launch("*/*") }
+                    onClick = { pickerLauncher.launch(filter.mime) }
                 )
             }
         }
@@ -112,7 +119,7 @@ private fun FilePickerContent(
                 )
                 ControlButton(
                     text = stringResource(id = R.string.file_picker_launch),
-                    onClick = { multiplePickerLauncher.launch("*/*") }
+                    onClick = { multiplePickerLauncher.launch(filter.mime) }
                 )
             }
         }
@@ -144,6 +151,53 @@ private fun FilePickerContent(
                 state = pagerState
             ) {
                 DocumentFileItem(data = documentFiles[it])
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun FilterSelector(
+    filter: TypeFilter,
+    onChangeFilter: (TypeFilter) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            readOnly = true,
+            value = stringResource(id = filter.resource),
+            onValueChange = { },
+            label = { Text(text = stringResource(id = R.string.filter_title)) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
+            }
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = {
+                expanded = false
+            }
+        ) {
+            AvailableFilters.list.forEach { filter ->
+                DropdownMenuItem(
+                    onClick = {
+                        onChangeFilter(filter)
+                        expanded = false
+                    }
+                ) {
+                    Text(text = stringResource(id = filter.resource))
+                }
             }
         }
     }
@@ -265,7 +319,11 @@ private fun FilePickerPreview() {
 
 class FakeFilePickerComponent : FilePickerComponent {
 
+    override var filter: TypeFilter = TypeFilter.All
+
     override var documentFiles: List<DocumentFileViewData>? = null
+
+    override fun onChangeFilter(filter: TypeFilter) = Unit
 
     override fun onOpenFile(uri: Uri) = Unit
 
