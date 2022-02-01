@@ -6,6 +6,6 @@ data class MediaFile(
     val uri: Uri?,
     val name: String,
     val type: String,
-    val sizeKb: Int,
+    val sizeKb: Long,
     val date: Long
 )

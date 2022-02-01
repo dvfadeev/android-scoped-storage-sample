@@ -6,6 +6,8 @@ interface NavigationComponent {
 
     fun onMediaStoreClick()
 
+    fun onFilePickerClick()
+
     sealed interface Output {
         class ModuleRequested(val type: NavigationModule) : Output
     }

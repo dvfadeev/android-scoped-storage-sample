@@ -8,9 +8,9 @@ import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
 import com.example.scoped_storage_example.core.data.gateway.current_time.CurrentTime
 import com.example.scoped_storage_example.core.data.gateway.logger.Logger
+import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
 import com.example.scoped_storage_example.media_store.data.MediaStoreGateway
-import com.example.scoped_storage_example.media_store.data.models.MediaType
 import kotlinx.coroutines.launch
 
 class RealMediaStoreComponent(
@@ -22,7 +22,8 @@ class RealMediaStoreComponent(
 
     private val coroutineScope = componentCoroutineScope()
 
-    override var mediaType: MediaType by mutableStateOf(MediaType.All)
+
+    override var filter: TypeFilter by mutableStateOf(TypeFilter.All)
 
     override var mediaFiles: List<MediaFileViewData>? by mutableStateOf(null)
 
@@ -51,8 +52,8 @@ class RealMediaStoreComponent(
         }
     }
 
-    override fun onChangeMediaType(mediaType: MediaType) {
-        this.mediaType = mediaType
+    override fun onChangeFilter(filter: TypeFilter) {
+        this.filter = filter
         onLoadMedia()
     }
 
@@ -74,7 +75,7 @@ class RealMediaStoreComponent(
     }
 
     private suspend fun refresh() {
-        mediaFiles = mediaStore.loadMediaFiles(mediaType).map { it.toViewData() }
+        mediaFiles = mediaStore.loadMediaFiles(filter).map { it.toViewData() }
     }
 
     private fun onBackPressed(): Boolean {

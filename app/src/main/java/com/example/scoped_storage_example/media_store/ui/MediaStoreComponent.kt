@@ -2,11 +2,11 @@ package com.example.scoped_storage_example.media_store.ui
 
 import android.graphics.Bitmap
 import android.net.Uri
-import com.example.scoped_storage_example.media_store.data.models.MediaType
+import com.example.scoped_storage_example.core.utils.TypeFilter
 
 interface MediaStoreComponent {
 
-    var mediaType: MediaType
+    var filter: TypeFilter
 
     var mediaFiles: List<MediaFileViewData>?
 
@@ -18,7 +18,7 @@ interface MediaStoreComponent {
 
     fun onSaveBitmap(bitmap: Bitmap)
 
-    fun onChangeMediaType(mediaType: MediaType)
+    fun onChangeFilter(filter: TypeFilter)
 
     fun onFileClick(uri: Uri)
 
