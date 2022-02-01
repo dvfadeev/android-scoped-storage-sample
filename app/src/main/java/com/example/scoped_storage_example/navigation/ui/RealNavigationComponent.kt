@@ -14,4 +14,8 @@ class RealNavigationComponent(
     override fun onMediaStoreClick() {
         onOutput(NavigationComponent.Output.ModuleRequested(NavigationModule.MediaStore))
     }
+
+    override fun onFilePickerClick() {
+        onOutput(NavigationComponent.Output.ModuleRequested(NavigationModule.FilePicker))
+    }
 }

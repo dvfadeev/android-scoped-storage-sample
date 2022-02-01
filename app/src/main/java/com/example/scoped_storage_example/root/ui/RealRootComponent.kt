@@ -10,6 +10,7 @@ import com.example.scoped_storage_example.app_storage.createAppStorageComponent
 import com.example.scoped_storage_example.core.data.gateway.logger.Logger
 import com.example.scoped_storage_example.core.utils.ComponentFactory
 import com.example.scoped_storage_example.core.utils.toComposeState
+import com.example.scoped_storage_example.file_picker.createFilePickerComponent
 import com.example.scoped_storage_example.media_store.createMediaStoreComponent
 import com.example.scoped_storage_example.navigation.createNavigationComponent
 import com.example.scoped_storage_example.navigation.ui.NavigationComponent
@@ -44,6 +45,9 @@ class RealRootComponent(
             is ChildConfig.MediaStore -> RootComponent.Child.MediaStore(
                 componentFactory.createMediaStoreComponent(componentContext)
             )
+            is ChildConfig.FilePicker -> RootComponent.Child.FilePicker(
+                componentFactory.createFilePickerComponent(componentContext)
+            )
         }
     }
 
@@ -56,6 +60,9 @@ class RealRootComponent(
                     }
                     NavigationModule.MediaStore -> {
                         router.push(ChildConfig.MediaStore)
+                    }
+                    NavigationModule.FilePicker -> {
+                        router.push(ChildConfig.FilePicker)
                     }
                 }
             }
@@ -72,5 +79,8 @@ class RealRootComponent(
 
         @Parcelize
         object MediaStore : ChildConfig
+
+        @Parcelize
+        object FilePicker : ChildConfig
     }
 }

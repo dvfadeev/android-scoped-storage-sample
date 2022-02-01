@@ -37,4 +37,7 @@
     <string name="media_store_file_resolution">Resolution:</string>
     <string name="media_store_file_duration">Duration:</string>
 
+    <!-- FilePicker -->
+    <string name="file_picker_title">File Picker</string>
+
 </resources>

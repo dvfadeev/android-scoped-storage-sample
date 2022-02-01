@@ -1,0 +1,3 @@
+package com.example.scoped_storage_example.file_picker.ui
+
+interface FilePickerComponent

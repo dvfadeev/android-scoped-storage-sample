@@ -31,6 +31,7 @@ fun NavigationUi(
             NavigationContent(
                 onAppStorageClick = component::onAppStorageClick,
                 onMediaStoreClick = component::onMediaStoreClick,
+                onFilePickerClick = component::onFilePickerClick,
                 modifier = Modifier.padding(it)
             )
         }
@@ -41,6 +42,7 @@ fun NavigationUi(
 private fun NavigationContent(
     onAppStorageClick: () -> Unit,
     onMediaStoreClick: () -> Unit,
+    onFilePickerClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -55,6 +57,11 @@ private fun NavigationContent(
         NavigationButton(
             text = stringResource(id = R.string.media_store_title),
             onClick = onMediaStoreClick
+        )
+
+        NavigationButton(
+            text = stringResource(id = R.string.file_picker_title),
+            onClick = onFilePickerClick
         )
     }
 }
@@ -92,4 +99,6 @@ class FakeNavigationComponent : NavigationComponent {
     override fun onAppStorageClick() = Unit
 
     override fun onMediaStoreClick() = Unit
+
+    override fun onFilePickerClick() = Unit
 }
