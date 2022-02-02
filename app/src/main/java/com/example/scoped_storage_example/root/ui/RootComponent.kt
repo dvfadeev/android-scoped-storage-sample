@@ -1,9 +1,9 @@
 package com.example.scoped_storage_example.root.ui
 
 import com.arkivanov.decompose.router.RouterState
-import com.example.scoped_storage_example.app_storage.ui.AppStorageComponent
-import com.example.scoped_storage_example.file_picker.ui.FilePickerComponent
-import com.example.scoped_storage_example.media_store.ui.MediaStoreComponent
+import com.example.scoped_storage_example.modules.app_storage.ui.AppStorageComponent
+import com.example.scoped_storage_example.modules.file_picker.ui.FilePickerComponent
+import com.example.scoped_storage_example.modules.media_store.ui.MediaStoreComponent
 import com.example.scoped_storage_example.navigation.ui.NavigationComponent
 
 interface RootComponent {

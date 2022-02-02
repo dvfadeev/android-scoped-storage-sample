@@ -15,14 +15,11 @@ class App : Application(), KoinProvider {
     override fun onCreate() {
         super.onCreate()
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        koin = createKoin()
-        koin.declare(ComponentFactory(koin))
-    }
-
-    private fun createKoin(): Koin {
-        return koinApplication {
+        koin = koinApplication {
             androidContext(this@App)
             modules(allModules)
-        }.koin
+        }.koin.apply {
+            declare(ComponentFactory(koin))
+        }
     }
 }
