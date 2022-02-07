@@ -18,8 +18,8 @@ class App : Application(), KoinProvider {
         koin = koinApplication {
             androidContext(this@App)
             modules(allModules)
-        }.koin.apply {
-            declare(ComponentFactory(koin))
-        }
+        }.koin
+
+        koin.declare(ComponentFactory(koin))
     }
 }
