@@ -8,14 +8,19 @@ class RealNavigationComponent(
 ) : ComponentContext by componentContext, NavigationComponent {
 
     override fun onAppStorageClick() {
-        onOutput(NavigationComponent.Output.ModuleRequested(NavigationModule.AppStorage))
+        openModule(NavigationModule.AppStorage)
     }
 
     override fun onMediaStoreClick() {
-        onOutput(NavigationComponent.Output.ModuleRequested(NavigationModule.MediaStore))
+        openModule(NavigationModule.MediaStore)
     }
 
     override fun onFilePickerClick() {
-        onOutput(NavigationComponent.Output.ModuleRequested(NavigationModule.FilePicker))
+        openModule(NavigationModule.FilePicker)
+    }
+
+    private fun openModule(module: NavigationModule) {
+        onOutput(NavigationComponent.Output.ModuleRequested(module))
+
     }
 }

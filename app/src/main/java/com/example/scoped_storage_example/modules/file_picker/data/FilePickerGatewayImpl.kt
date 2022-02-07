@@ -7,8 +7,16 @@ import com.example.scoped_storage_example.modules.file_picker.data.models.Docume
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * File picker only returns document uri,
+ * To get the fields of a file you have to use content resolver
+ */
 class FilePickerGatewayImpl(private val context: Context) : FilePickerGateway {
 
+    /**
+     * Open document file by uri
+     * @return DocumentFile
+     */
     override suspend fun openDocument(uri: Uri): DocumentFile? = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         var resultImage: DocumentFile? = null

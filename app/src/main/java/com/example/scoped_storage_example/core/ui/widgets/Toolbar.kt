@@ -35,7 +35,6 @@ fun Toolbar(
     )
 }
 
-
 @Composable
 fun NavigationButton(
     modifier: Modifier = Modifier

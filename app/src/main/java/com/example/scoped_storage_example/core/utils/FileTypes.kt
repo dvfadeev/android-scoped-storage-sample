@@ -1,4 +1,4 @@
-package com.example.scoped_storage_example.core.data
+package com.example.scoped_storage_example.core.utils
 
 object FileTypes {
 

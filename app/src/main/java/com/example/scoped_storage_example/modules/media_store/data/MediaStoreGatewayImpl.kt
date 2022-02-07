@@ -8,7 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import com.example.scoped_storage_example.core.data.FileTypes
+import com.example.scoped_storage_example.core.utils.FileTypes
 import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.example.scoped_storage_example.modules.media_store.data.models.DetailedMediaFile
 import com.example.scoped_storage_example.modules.media_store.data.models.MediaFile

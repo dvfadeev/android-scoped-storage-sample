@@ -1,11 +1,10 @@
 package com.example.scoped_storage_example.modules.media_store.ui
 
 import android.net.Uri
+import com.example.scoped_storage_example.core.data.FILE_DATE_PATTERN
 import com.example.scoped_storage_example.modules.media_store.data.models.MediaFile
 import java.text.SimpleDateFormat
 import java.util.*
-
-private const val FILE_DATE_PATTERN = "dd.MM.yyyy HH:mm:ss"
 
 data class MediaFileViewData(
     val uri: Uri?,

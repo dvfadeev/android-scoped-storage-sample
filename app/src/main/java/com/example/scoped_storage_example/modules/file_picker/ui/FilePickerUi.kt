@@ -237,7 +237,7 @@ private fun PageSwitcher(
 @Composable
 private fun DocumentFileItem(
     data: DocumentFileViewData,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     CustomCard(modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp)) {
         Column(

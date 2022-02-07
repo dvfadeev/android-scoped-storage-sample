@@ -1,11 +1,10 @@
 package com.example.scoped_storage_example.modules.file_picker.ui
 
 import android.net.Uri
+import com.example.scoped_storage_example.core.data.FILE_DATE_PATTERN
 import com.example.scoped_storage_example.modules.file_picker.data.models.DocumentFile
 import java.text.SimpleDateFormat
 import java.util.*
-
-private const val FILE_DATE_PATTERN = "dd.MM.yyyy HH:mm:ss"
 
 data class DocumentFileViewData(
     val uri: Uri,

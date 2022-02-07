@@ -1,6 +1,4 @@
-package com.example.scoped_storage_example.core.data.gateway.logger
-
-import com.example.scoped_storage_example.core.data.gateway.current_time.CurrentTime
+package com.example.scoped_storage_example.core.data
 
 class LoggerImpl(private val time: CurrentTime) : Logger {
 

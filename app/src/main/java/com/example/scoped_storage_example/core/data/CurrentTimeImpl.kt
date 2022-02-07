@@ -1,4 +1,4 @@
-package com.example.scoped_storage_example.core.data.gateway.current_time
+package com.example.scoped_storage_example.core.data
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant

@@ -427,4 +427,3 @@ class FakeMediaStoreComponent : MediaStoreComponent {
 
     override fun onFileRemoveClick(uri: Uri) = Unit
 }
-

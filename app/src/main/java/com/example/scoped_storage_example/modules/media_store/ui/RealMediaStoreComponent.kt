@@ -6,8 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
-import com.example.scoped_storage_example.core.data.gateway.current_time.CurrentTime
-import com.example.scoped_storage_example.core.data.gateway.logger.Logger
+import com.example.scoped_storage_example.core.data.CurrentTime
+import com.example.scoped_storage_example.core.data.Logger
 import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
 import com.example.scoped_storage_example.modules.media_store.data.MediaStoreGateway
@@ -21,7 +21,6 @@ class RealMediaStoreComponent(
 ) : ComponentContext by componentContext, MediaStoreComponent {
 
     private val coroutineScope = componentCoroutineScope()
-
 
     override var filter: TypeFilter by mutableStateOf(TypeFilter.All)
 
