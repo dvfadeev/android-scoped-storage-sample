@@ -61,11 +61,17 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             val dateColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)
 
             while (cursor.moveToNext()) {
+
                 val id = cursor.getLong(idColumnIndex)
                 val name = cursor.getString(nameColumnIndex)
-                val type = cursor.getString(typeColumnIndex).split(File.separator).first()
+                val type = cursor.getString(typeColumnIndex)?.split(File.separator)?.first()
                 val sizeKb = cursor.getLong(sizeColumnIndex) / 1024
                 val date = cursor.getLong(dateColumnIndex) * 1000
+
+                if(name == null || type == null) {
+                    // Ignore broken files
+                    continue
+                }
 
                 val uriColumn = when (type) {
                     "image" -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -80,7 +86,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                 files += MediaFile(
                     uri = uri,
                     name = name,
-                    type = type,
+                    type = type!!,
                     sizeKb = sizeKb,
                     date = date
                 )
@@ -96,7 +102,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
     override suspend fun writeImage(fileName: String, bitmap: Bitmap) = withContext(Dispatchers.IO) {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + "." + FileTypes.TYPE_PHOTO)
-            put(MediaStore.MediaColumns.MIME_TYPE, FileTypes.MIME_TYPE_PHOTO)
+            put(MediaStore.MediaColumns.MIME_TYPE, FileTypes.MIME_TYPE_PHOTO_JPEG)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
@@ -160,7 +166,12 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             val width = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH))
             val dateTaken = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN))
             val description = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DESCRIPTION))
-            val duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DURATION))
+
+            val duration = if (mimeType.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
+                cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DURATION))
+            } else {
+                null
+            }
 
             resultImage = DetailedMediaFile(
                 uri = uri,

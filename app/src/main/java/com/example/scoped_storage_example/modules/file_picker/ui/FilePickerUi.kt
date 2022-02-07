@@ -150,7 +150,9 @@ private fun FilePickerContent(
             HorizontalPager(
                 state = pagerState
             ) {
-                DocumentFileItem(data = documentFiles[it])
+                if (size > it) {
+                    DocumentFileItem(data = documentFiles[it])
+                }
             }
         }
     }
