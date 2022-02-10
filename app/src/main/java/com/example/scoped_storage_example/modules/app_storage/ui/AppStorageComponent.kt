@@ -2,15 +2,15 @@ package com.example.scoped_storage_example.modules.app_storage.ui
 
 interface AppStorageComponent {
 
-    var isInternalStorage: Boolean
+    val isInternalStorage: Boolean
 
-    var availableSpace: Long
+    val availableSpace: Long
 
-    var files: List<StorageFileViewData>
+    val files: List<StorageFileViewData>
 
-    var selectedFile: StorageFileContentViewData?
+    val selectedFile: StorageFileContentViewData?
 
-    var isShowFileContent: Boolean
+    val isShowFileContent: Boolean
 
     fun onToggleStorageClick()
 

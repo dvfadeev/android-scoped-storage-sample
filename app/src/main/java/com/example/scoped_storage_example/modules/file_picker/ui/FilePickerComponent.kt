@@ -5,9 +5,9 @@ import com.example.scoped_storage_example.core.utils.TypeFilter
 
 interface FilePickerComponent {
 
-    var filter: TypeFilter
+    val filter: TypeFilter
 
-    var documentFiles: List<DocumentFileViewData>?
+    val documentFiles: List<DocumentFileViewData>?
 
     fun onChangeFilter(filter: TypeFilter)
 
