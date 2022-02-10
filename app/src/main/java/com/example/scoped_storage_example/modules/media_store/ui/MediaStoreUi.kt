@@ -98,7 +98,9 @@ private fun MediaStorePermissionScreen(
         permissionNotAvailableContent = {
         }
     ) {
-        onLoadMedia.invoke()
+        LaunchedEffect(key1 = Unit) {
+            onLoadMedia.invoke()
+        }
 
         val scrollState = rememberLazyListState()
 
