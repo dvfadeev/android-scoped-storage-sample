@@ -102,6 +102,10 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + "." + FileTypes.TYPE_PHOTO)
             put(MediaStore.MediaColumns.MIME_TYPE, FileTypes.MIME_TYPE_PHOTO_JPEG)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
+            }
         }
 
         var uri: Uri? = null
@@ -115,6 +119,14 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                             throw IOException("Failed to save bitmap!")
                         }
                     } ?: throw IOException("Failed to create new MediaStore record!")
+
+                    values.put(MediaStore.MediaColumns.SIZE, bitmap.byteCount)
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                    }
+
+                    update(it, values, null, null)
                 }
             }
         }.getOrElse {
