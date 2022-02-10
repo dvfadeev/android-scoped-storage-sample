@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
@@ -51,8 +52,7 @@ fun MediaStoreUi(
         content = {
             MediaStorePermissionScreen(
                 component = component,
-                modifier = Modifier.padding(it),
-                onLoadMedia = component::onLoadMedia
+                modifier = Modifier.padding(it)
             )
         }
     )
@@ -62,8 +62,7 @@ fun MediaStoreUi(
 @OptIn(ExperimentalPermissionsApi::class)
 private fun MediaStorePermissionScreen(
     component: MediaStoreComponent,
-    modifier: Modifier = Modifier,
-    onLoadMedia: () -> Unit
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { photo ->
@@ -71,73 +70,95 @@ private fun MediaStorePermissionScreen(
             component.onSaveBitmap(it)
         }
     }
+    val request = component.permissionRequest
 
-    if (component.isCameraRequested) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            LaunchedEffect(key1 = Unit) {
-                cameraLauncher.launch()
-                component.onResetCameraRequest()
+    PermissionChecker(
+        permission = request.permission,
+        message = stringResource(id = request.messageResource),
+        onCancelClick = {
+            if (request == PermissionRequest.ReadStorage) {
+                (context as Activity).onBackPressed()
+            } else {
+                component.onRequestPermission(PermissionRequest.ReadStorage)
             }
-        } else {
-            PermissionChecker(
-                permission = android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                message = stringResource(id = R.string.media_store_write_permission_request),
-                onCancelClick = { component.onResetCameraRequest() }) {
+        }) {
+
+        when (request) {
+            PermissionRequest.ReadStorage -> {
+                MediaStoreContent(
+                    cameraLauncher = cameraLauncher,
+                    component = component,
+                    modifier = modifier
+                )
+            }
+
+            PermissionRequest.TakePhoto -> {
                 LaunchedEffect(key1 = Unit) {
                     cameraLauncher.launch()
-                    component.onResetCameraRequest()
+                    component.onRequestPermission(PermissionRequest.ReadStorage)
                 }
             }
-        }
-    } else {
-        PermissionChecker(
-            permission = android.Manifest.permission.READ_EXTERNAL_STORAGE,
-            message = stringResource(id = R.string.media_store_read_permission_request),
-            onCancelClick = {
-                (context as Activity).onBackPressed()
-            }
-        ) {
-            LaunchedEffect(key1 = Unit) {
-                onLoadMedia.invoke()
-            }
 
-            val scrollState = rememberLazyListState()
-
-            SlideAnimationScreen(
-                firstScreen = {
-                    MediaStoreContent(
-                        filter = component.filter,
-                        mediaFiles = component.mediaFiles,
-                        onCameraRequest = component::onCameraRequest,
-                        onChangeMediaType = component::onChangeFilter,
-                        onFileClick = component::onFileClick,
-                        onFileRemoveClick = component::onFileRemoveClick,
-                        scrollState = scrollState,
-                        modifier = modifier
-                    )
-                },
-                secondScreen = {
-                    component.selectedMediaFIle?.let {
-                        FileContent(file = it)
-                    } ?: run {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            CircularProgressIndicator(modifier = Modifier.align(Center))
-                        }
-                    }
-                },
-                isShowSecondScreen = component.isShowImageFileContent
-            )
+            PermissionRequest.RemoveFile -> {
+                component.selectedUri?.let {
+                    component.onFileRemoveClick(it)
+                    component.onRequestPermission(PermissionRequest.ReadStorage)
+                }
+            }
         }
     }
 }
 
+
 @Composable
 private fun MediaStoreContent(
+    cameraLauncher: ManagedActivityResultLauncher<Void?, Bitmap?>,
+    component: MediaStoreComponent,
+    modifier: Modifier = Modifier
+) {
+    LaunchedEffect(key1 = Unit) {
+        component.onLoadMedia()
+    }
+
+    val scrollState = rememberLazyListState()
+
+    SlideAnimationScreen(
+        firstScreen = {
+            MediaStoreListContent(
+                cameraLauncher = cameraLauncher,
+                filter = component.filter,
+                mediaFiles = component.mediaFiles,
+                onRequestPermission = component::onRequestPermission,
+                onChangeMediaType = component::onChangeFilter,
+                onFileClick = component::onFileClick,
+                onFileLongClick = component::onFileLongClick,
+                onFileRemoveClick = component::onFileRemoveClick,
+                scrollState = scrollState,
+                modifier = modifier
+            )
+        },
+        secondScreen = {
+            component.selectedMediaFile?.let {
+                FileContent(file = it)
+            } ?: run {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(modifier = Modifier.align(Center))
+                }
+            }
+        },
+        isShowSecondScreen = component.isShowImageFileContent
+    )
+}
+
+@Composable
+private fun MediaStoreListContent(
+    cameraLauncher: ManagedActivityResultLauncher<Void?, Bitmap?>,
     filter: TypeFilter,
     mediaFiles: List<MediaFileViewData>?,
-    onCameraRequest: () -> Unit,
+    onRequestPermission: (PermissionRequest) -> Unit,
     onChangeMediaType: (TypeFilter) -> Unit,
     onFileClick: (Uri) -> Unit,
+    onFileLongClick: (Uri) -> Unit,
     onFileRemoveClick: (Uri) -> Unit,
     scrollState: LazyListState,
     modifier: Modifier = Modifier
@@ -149,7 +170,13 @@ private fun MediaStoreContent(
     ) {
         ControlButton(
             text = stringResource(id = R.string.media_store_take_photo),
-            onClick = onCameraRequest,
+            onClick = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    cameraLauncher.launch()
+                } else {
+                    onRequestPermission(PermissionRequest.TakePhoto)
+                }
+            },
             modifier = Modifier.align(CenterHorizontally)
         )
 
@@ -173,7 +200,14 @@ private fun MediaStoreContent(
                     MediaFileItem(
                         data = it,
                         onFileClick = onFileClick,
-                        onFileRemoveClick = onFileRemoveClick
+                        onFileLongClick = onFileLongClick,
+                        onFileRemoveClick = { uri ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                onFileRemoveClick(uri)
+                            } else {
+                                onRequestPermission(PermissionRequest.RemoveFile)
+                            }
+                        }
                     )
                 }
             }
@@ -277,6 +311,7 @@ private fun MediaTypeSelector(
 private fun MediaFileItem(
     data: MediaFileViewData,
     onFileClick: (Uri) -> Unit,
+    onFileLongClick: (Uri) -> Unit,
     onFileRemoveClick: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -295,7 +330,12 @@ private fun MediaFileItem(
                             onFileClick(it)
                         }
                     },
-                    onLongClick = { expanded = true }
+                    onLongClick = {
+                        data.uri?.let {
+                            expanded = true
+                            onFileLongClick(it)
+                        }
+                    }
                 )
                 .padding(start = 8.dp, end = 8.dp, top = 8.dp)
         ) {
@@ -390,14 +430,10 @@ fun CaptionText(
 private fun MediaStoreUiPreview() {
     AppTheme {
         val component = FakeMediaStoreComponent()
+        val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {}
         MediaStoreContent(
-            component.filter,
-            component.mediaFiles!!,
-            component::onCameraRequest,
-            component::onChangeFilter,
-            component::onFileClick,
-            component::onFileRemoveClick,
-            rememberLazyListState()
+            cameraLauncher,
+            component
         )
     }
 }
@@ -406,27 +442,29 @@ class FakeMediaStoreComponent : MediaStoreComponent {
 
     override var filter: TypeFilter = TypeFilter.All
 
-    override val isCameraRequested: Boolean = false
+    override val permissionRequest: PermissionRequest = PermissionRequest.ReadStorage
 
     override var mediaFiles: List<MediaFileViewData>? = List(5) {
         MediaFileViewData.MOCK
     }
 
-    override var selectedMediaFIle: DetailedImageFileViewData? = null
+    override val selectedUri: Uri? = null
+
+    override var selectedMediaFile: DetailedImageFileViewData? = null
 
     override var isShowImageFileContent: Boolean = false
 
     override fun onLoadMedia() = Unit
 
-    override fun onCameraRequest() = Unit
-
-    override fun onResetCameraRequest() = Unit
+    override fun onRequestPermission(permissionRequest: PermissionRequest) = Unit
 
     override fun onSaveBitmap(bitmap: Bitmap) = Unit
 
     override fun onChangeFilter(filter: TypeFilter) = Unit
 
     override fun onFileClick(uri: Uri) = Unit
+
+    override fun onFileLongClick(uri: Uri) = Unit
 
     override fun onFileRemoveClick(uri: Uri) = Unit
 }

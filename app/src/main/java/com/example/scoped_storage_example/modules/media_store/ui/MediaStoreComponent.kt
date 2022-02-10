@@ -10,23 +10,25 @@ interface MediaStoreComponent {
 
     val mediaFiles: List<MediaFileViewData>?
 
-    val selectedMediaFIle: DetailedImageFileViewData?
+    val permissionRequest: PermissionRequest
 
-    val isCameraRequested: Boolean
+    val selectedUri: Uri?
+
+    val selectedMediaFile: DetailedImageFileViewData?
 
     val isShowImageFileContent: Boolean
 
     fun onLoadMedia()
 
-    fun onCameraRequest()
-
-    fun onResetCameraRequest()
+    fun onRequestPermission(permissionRequest: PermissionRequest)
 
     fun onSaveBitmap(bitmap: Bitmap)
 
     fun onChangeFilter(filter: TypeFilter)
 
     fun onFileClick(uri: Uri)
+
+    fun onFileLongClick(uri: Uri)
 
     fun onFileRemoveClick(uri: Uri)
 }

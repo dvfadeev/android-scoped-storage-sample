@@ -26,11 +26,13 @@ class RealMediaStoreComponent(
 
     override var mediaFiles: List<MediaFileViewData>? by mutableStateOf(null)
 
-    override var selectedMediaFIle: DetailedImageFileViewData? by mutableStateOf(null)
+    override var selectedUri: Uri? by mutableStateOf(null)
+
+    override var selectedMediaFile: DetailedImageFileViewData? by mutableStateOf(null)
 
     override var isShowImageFileContent: Boolean by mutableStateOf(false)
 
-    override var isCameraRequested: Boolean by mutableStateOf(false)
+    override var permissionRequest: PermissionRequest by mutableStateOf(PermissionRequest.ReadStorage)
 
     init {
         logger.log("Init AppStorageComponent")
@@ -44,13 +46,8 @@ class RealMediaStoreComponent(
         }
     }
 
-
-    override fun onCameraRequest() {
-        isCameraRequested = true
-    }
-
-    override fun onResetCameraRequest() {
-        isCameraRequested = false
+    override fun onRequestPermission(permissionRequest: PermissionRequest) {
+        this.permissionRequest = permissionRequest
     }
 
     override fun onSaveBitmap(bitmap: Bitmap) {
@@ -68,13 +65,18 @@ class RealMediaStoreComponent(
     }
 
     override fun onFileClick(uri: Uri) {
+        selectedUri = uri
         coroutineScope.launch {
             mediaStore.openMediaFile(uri)?.let {
-                selectedMediaFIle = it.toViewData()
+                selectedMediaFile = it.toViewData()
                 isShowImageFileContent = true
                 logger.log("Image ${it.name} loaded")
             }
         }
+    }
+
+    override fun onFileLongClick(uri: Uri) {
+        selectedUri = uri
     }
 
     override fun onFileRemoveClick(uri: Uri) {
@@ -95,12 +97,10 @@ class RealMediaStoreComponent(
                 logger.log("Media file content viewer closed")
                 true
             }
-
-            isCameraRequested -> {
-                isCameraRequested = false
+            permissionRequest == PermissionRequest.TakePhoto || permissionRequest == PermissionRequest.RemoveFile -> {
+                permissionRequest = PermissionRequest.ReadStorage
                 true
             }
-
             else -> false
         }
     }
