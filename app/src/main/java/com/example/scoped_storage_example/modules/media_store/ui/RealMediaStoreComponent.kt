@@ -30,6 +30,8 @@ class RealMediaStoreComponent(
 
     override var isShowImageFileContent: Boolean by mutableStateOf(false)
 
+    override var isCameraRequested: Boolean by mutableStateOf(false)
+
     init {
         logger.log("Init AppStorageComponent")
         backPressedHandler.register(::onBackPressed)
@@ -40,6 +42,15 @@ class RealMediaStoreComponent(
             refresh()
             logger.log("Media loaded")
         }
+    }
+
+
+    override fun onCameraRequest() {
+        isCameraRequested = true
+    }
+
+    override fun onResetCameraRequest() {
+        isCameraRequested = false
     }
 
     override fun onSaveBitmap(bitmap: Bitmap) {
@@ -78,12 +89,19 @@ class RealMediaStoreComponent(
     }
 
     private fun onBackPressed(): Boolean {
-        return if (isShowImageFileContent) {
-            isShowImageFileContent = false
-            logger.log("Media file content viewer closed")
-            true
-        } else {
-            false
+        return when {
+            isShowImageFileContent -> {
+                isShowImageFileContent = false
+                logger.log("Media file content viewer closed")
+                true
+            }
+
+            isCameraRequested -> {
+                isCameraRequested = false
+                true
+            }
+
+            else -> false
         }
     }
 }

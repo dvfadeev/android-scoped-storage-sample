@@ -6,7 +6,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.provider.MediaStore
 import com.example.scoped_storage_example.core.utils.FileTypes
 import com.example.scoped_storage_example.core.utils.TypeFilter
@@ -68,7 +67,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                 val sizeKb = cursor.getLong(sizeColumnIndex) / 1024
                 val date = cursor.getLong(dateColumnIndex) * 1000
 
-                if(name == null || type == null) {
+                if (name == null || type == null) {
                     // Ignore broken files
                     continue
                 }
@@ -86,7 +85,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                 files += MediaFile(
                     uri = uri,
                     name = name,
-                    type = type!!,
+                    type = type,
                     sizeKb = sizeKb,
                     date = date
                 )
@@ -103,12 +102,6 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + "." + FileTypes.TYPE_PHOTO)
             put(MediaStore.MediaColumns.MIME_TYPE, FileTypes.MIME_TYPE_PHOTO_JPEG)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
-            } else {
-                put(MediaStore.Images.Media.DATA, Environment.DIRECTORY_PICTURES)
-            }
         }
 
         var uri: Uri? = null
@@ -130,6 +123,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             }
             throw it
         }
+
         return@withContext
     }
 

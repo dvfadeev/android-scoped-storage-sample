@@ -3,6 +3,7 @@ package com.example.scoped_storage_example.modules.media_store.ui
 import android.app.Activity
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
@@ -23,7 +24,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,8 +34,6 @@ import com.example.scoped_storage_example.core.ui.widgets.*
 import com.example.scoped_storage_example.core.utils.AvailableFilters
 import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionRequired
-import com.google.accompanist.permissions.rememberPermissionState
 
 @Composable
 fun MediaStoreUi(
@@ -68,66 +66,68 @@ private fun MediaStorePermissionScreen(
     onLoadMedia: () -> Unit
 ) {
     val context = LocalContext.current
-    val storagePermissionState = rememberPermissionState(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-    PermissionRequired(
-        permissionState = storagePermissionState,
-        permissionNotGrantedContent = {
-            Box(modifier = modifier.fillMaxSize()) {
-                Column(modifier = modifier.align(Center)) {
-                    Text(
-                        text = stringResource(id = R.string.media_store_permission_request),
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.align(CenterHorizontally)
-                    ) {
-                        ControlButton(
-                            text = stringResource(id = R.string.ok),
-                            onClick = { storagePermissionState.launchPermissionRequest() }
-                        )
-                        ControlButton(
-                            text = stringResource(id = R.string.close),
-                            onClick = { (context as Activity).onBackPressed() }
-                        )
-                    }
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { photo ->
+        photo?.let {
+            component.onSaveBitmap(it)
+        }
+    }
+
+    if (component.isCameraRequested) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            LaunchedEffect(key1 = Unit) {
+                cameraLauncher.launch()
+                component.onResetCameraRequest()
+            }
+        } else {
+            PermissionChecker(
+                permission = android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                message = stringResource(id = R.string.media_store_write_permission_request),
+                onCancelClick = { component.onResetCameraRequest() }) {
+                LaunchedEffect(key1 = Unit) {
+                    cameraLauncher.launch()
+                    component.onResetCameraRequest()
                 }
             }
-        },
-        permissionNotAvailableContent = {
         }
-    ) {
-        LaunchedEffect(key1 = Unit) {
-            onLoadMedia.invoke()
-        }
+    } else {
+        PermissionChecker(
+            permission = android.Manifest.permission.READ_EXTERNAL_STORAGE,
+            message = stringResource(id = R.string.media_store_read_permission_request),
+            onCancelClick = {
+                (context as Activity).onBackPressed()
+            }
+        ) {
+            LaunchedEffect(key1 = Unit) {
+                onLoadMedia.invoke()
+            }
 
-        val scrollState = rememberLazyListState()
+            val scrollState = rememberLazyListState()
 
-        SlideAnimationScreen(
-            firstScreen = {
-                MediaStoreContent(
-                    filter = component.filter,
-                    mediaFiles = component.mediaFiles,
-                    onSaveBitmap = component::onSaveBitmap,
-                    onChangeMediaType = component::onChangeFilter,
-                    onFileClick = component::onFileClick,
-                    onFileRemoveClick = component::onFileRemoveClick,
-                    scrollState = scrollState,
-                    modifier = modifier
-                )
-            },
-            secondScreen = {
-                component.selectedMediaFIle?.let {
-                    FileContent(file = it)
-                } ?: run {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CircularProgressIndicator(modifier = Modifier.align(Center))
+            SlideAnimationScreen(
+                firstScreen = {
+                    MediaStoreContent(
+                        filter = component.filter,
+                        mediaFiles = component.mediaFiles,
+                        onCameraRequest = component::onCameraRequest,
+                        onChangeMediaType = component::onChangeFilter,
+                        onFileClick = component::onFileClick,
+                        onFileRemoveClick = component::onFileRemoveClick,
+                        scrollState = scrollState,
+                        modifier = modifier
+                    )
+                },
+                secondScreen = {
+                    component.selectedMediaFIle?.let {
+                        FileContent(file = it)
+                    } ?: run {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            CircularProgressIndicator(modifier = Modifier.align(Center))
+                        }
                     }
-                }
-            },
-            isShowSecondScreen = component.isShowImageFileContent
-        )
+                },
+                isShowSecondScreen = component.isShowImageFileContent
+            )
+        }
     }
 }
 
@@ -135,18 +135,13 @@ private fun MediaStorePermissionScreen(
 private fun MediaStoreContent(
     filter: TypeFilter,
     mediaFiles: List<MediaFileViewData>?,
-    onSaveBitmap: (Bitmap) -> Unit,
+    onCameraRequest: () -> Unit,
     onChangeMediaType: (TypeFilter) -> Unit,
     onFileClick: (Uri) -> Unit,
     onFileRemoveClick: (Uri) -> Unit,
     scrollState: LazyListState,
     modifier: Modifier = Modifier
 ) {
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { photo ->
-        photo?.let {
-            onSaveBitmap(it)
-        }
-    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -154,7 +149,7 @@ private fun MediaStoreContent(
     ) {
         ControlButton(
             text = stringResource(id = R.string.media_store_take_photo),
-            onClick = { launcher.launch() },
+            onClick = onCameraRequest,
             modifier = Modifier.align(CenterHorizontally)
         )
 
@@ -398,7 +393,7 @@ private fun MediaStoreUiPreview() {
         MediaStoreContent(
             component.filter,
             component.mediaFiles!!,
-            component::onSaveBitmap,
+            component::onCameraRequest,
             component::onChangeFilter,
             component::onFileClick,
             component::onFileRemoveClick,
@@ -411,6 +406,8 @@ class FakeMediaStoreComponent : MediaStoreComponent {
 
     override var filter: TypeFilter = TypeFilter.All
 
+    override val isCameraRequested: Boolean = false
+
     override var mediaFiles: List<MediaFileViewData>? = List(5) {
         MediaFileViewData.MOCK
     }
@@ -420,6 +417,10 @@ class FakeMediaStoreComponent : MediaStoreComponent {
     override var isShowImageFileContent: Boolean = false
 
     override fun onLoadMedia() = Unit
+
+    override fun onCameraRequest() = Unit
+
+    override fun onResetCameraRequest() = Unit
 
     override fun onSaveBitmap(bitmap: Bitmap) = Unit
 

@@ -12,9 +12,15 @@ interface MediaStoreComponent {
 
     val selectedMediaFIle: DetailedImageFileViewData?
 
+    val isCameraRequested: Boolean
+
     val isShowImageFileContent: Boolean
 
     fun onLoadMedia()
+
+    fun onCameraRequest()
+
+    fun onResetCameraRequest()
 
     fun onSaveBitmap(bitmap: Bitmap)
 

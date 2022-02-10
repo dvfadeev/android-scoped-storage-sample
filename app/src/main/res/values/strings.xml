@@ -18,7 +18,8 @@
 
     <!-- MediaStore -->
     <string name="media_store_title">Media Store</string>
-    <string name="media_store_permission_request">To open media storage you have to grant read external storage permission</string>
+    <string name="media_store_read_permission_request">To open media storage you have to grant read external storage permission</string>
+    <string name="media_store_write_permission_request">To save photo you have to grant write external storage permission</string>
     <string name="media_store_file">file</string>
     <string name="media_store_take_photo">Take photo</string>
     <string name="media_store_file_remove">Remove</string>
