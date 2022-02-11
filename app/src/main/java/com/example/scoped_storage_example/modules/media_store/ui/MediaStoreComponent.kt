@@ -6,21 +6,29 @@ import com.example.scoped_storage_example.core.utils.TypeFilter
 
 interface MediaStoreComponent {
 
-    var filter: TypeFilter
+    val filter: TypeFilter
 
-    var mediaFiles: List<MediaFileViewData>?
+    val mediaFiles: List<MediaFileViewData>?
 
-    var selectedMediaFIle: DetailedImageFileViewData?
+    val permissionRequest: PermissionRequest
 
-    var isShowImageFileContent: Boolean
+    val selectedUri: Uri?
+
+    val selectedMediaFile: DetailedImageFileViewData?
+
+    val isShowImageFileContent: Boolean
 
     fun onLoadMedia()
+
+    fun onRequestPermission(permissionRequest: PermissionRequest)
 
     fun onSaveBitmap(bitmap: Bitmap)
 
     fun onChangeFilter(filter: TypeFilter)
 
     fun onFileClick(uri: Uri)
+
+    fun onFileLongClick(uri: Uri)
 
     fun onFileRemoveClick(uri: Uri)
 }

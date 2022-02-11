@@ -1,12 +1,12 @@
 package com.example.scoped_storage_example.modules.media_store.data
 
+import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.provider.MediaStore
 import com.example.scoped_storage_example.core.utils.FileTypes
 import com.example.scoped_storage_example.core.utils.TypeFilter
@@ -68,7 +68,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                 val sizeKb = cursor.getLong(sizeColumnIndex) / 1024
                 val date = cursor.getLong(dateColumnIndex) * 1000
 
-                if(name == null || type == null) {
+                if (name == null || type == null) {
                     // Ignore broken files
                     continue
                 }
@@ -76,6 +76,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                 val uriColumn = when (type) {
                     "image" -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                     "video" -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    "audio" -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                     else -> null
                 }
 
@@ -86,7 +87,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                 files += MediaFile(
                     uri = uri,
                     name = name,
-                    type = type!!,
+                    type = type,
                     sizeKb = sizeKb,
                     date = date
                 )
@@ -102,12 +103,9 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
     override suspend fun writeImage(fileName: String, bitmap: Bitmap) = withContext(Dispatchers.IO) {
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + "." + FileTypes.TYPE_PHOTO)
-            put(MediaStore.MediaColumns.MIME_TYPE, FileTypes.MIME_TYPE_PHOTO_JPEG)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
-            } else {
-                put(MediaStore.Images.Media.DATA, Environment.DIRECTORY_PICTURES)
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
             }
         }
 
@@ -122,6 +120,14 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                             throw IOException("Failed to save bitmap!")
                         }
                     } ?: throw IOException("Failed to create new MediaStore record!")
+
+                    values.put(MediaStore.MediaColumns.SIZE, bitmap.byteCount)
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                    }
+
+                    update(it, values, null, null)
                 }
             }
         }.getOrElse {
@@ -130,6 +136,7 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             }
             throw it
         }
+
         return@withContext
     }
 
@@ -162,12 +169,27 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE))
             val sizeKb = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)) / 1024
             val dateAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)) * 1000
-            val height = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT))
-            val width = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH))
-            val dateTaken = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN))
-            val description = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DESCRIPTION))
 
-            val duration = if (mimeType.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
+            // Image / Video fields
+            val height: String?
+            val width: String?
+            val dateTaken: Long?
+            val description: String?
+
+            if (mimeType.startsWith(FileTypes.MIME_TYPE_IMAGE_ALL) || mimeType.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
+                height = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT))
+                width = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH))
+                dateTaken = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN))
+                description = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DESCRIPTION))
+            } else {
+                height = null
+                width = null
+                dateTaken = null
+                description = null
+            }
+
+            // Video / Audio fields
+            val duration = if (mimeType.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL) || mimeType.startsWith(FileTypes.MIME_TYPE_AUDIO_ALL)) {
                 cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DURATION))
             } else {
                 null
@@ -176,13 +198,13 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
             resultImage = DetailedMediaFile(
                 uri = uri,
                 name = name,
-                title = title ?: "",
-                path = path ?: "unknown",
-                mimeType = mimeType ?: "unknown",
+                title = title,
+                path = path,
+                mimeType = mimeType,
                 sizeKb = sizeKb,
                 dateAdded = dateAdded,
                 dateTaken = dateTaken,
-                description = description ?: "empty",
+                description = description,
                 height = height,
                 width = width,
                 duration = if (duration != null) {
@@ -198,10 +220,20 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
     /**
      * Remove file from media storage
      * It will be removed from disk as well
+     * On Android 10 and above, removing files that other apps own is restricted
+     * @return operation result
      */
-    override suspend fun removeMediaFile(uri: Uri) = withContext(Dispatchers.IO) {
+    override suspend fun removeMediaFile(uri: Uri): Boolean = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
-        resolver.delete(uri, null, null)
-        return@withContext
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                resolver.delete(uri, null, null)
+            } catch (e: RecoverableSecurityException) {
+                return@withContext false
+            }
+        } else {
+            resolver.delete(uri, null, null)
+        }
+        return@withContext true
     }
 }

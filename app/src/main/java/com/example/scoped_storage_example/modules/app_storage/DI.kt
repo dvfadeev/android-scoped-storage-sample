@@ -18,5 +18,5 @@ val appStorageModule = module {
 fun ComponentFactory.createAppStorageComponent(
     componentContext: ComponentContext
 ): AppStorageComponent {
-    return RealAppStorageComponent(componentContext, get(), get(), get())
+    return RealAppStorageComponent(componentContext, get(), get(), get(), get())
 }

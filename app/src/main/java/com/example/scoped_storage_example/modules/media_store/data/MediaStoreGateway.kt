@@ -14,5 +14,5 @@ interface MediaStoreGateway {
 
     suspend fun openMediaFile(uri: Uri): DetailedMediaFile?
 
-    suspend fun removeMediaFile(uri: Uri)
+    suspend fun removeMediaFile(uri: Uri): Boolean
 }
