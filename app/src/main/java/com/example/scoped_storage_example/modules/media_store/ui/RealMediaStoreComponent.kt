@@ -1,11 +1,15 @@
 package com.example.scoped_storage_example.modules.media_store.ui
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
+import com.example.scoped_storage_example.R
+import com.example.scoped_storage_example.core.data.ComponentToast
 import com.example.scoped_storage_example.core.data.CurrentTime
 import com.example.scoped_storage_example.core.data.Logger
 import com.example.scoped_storage_example.core.utils.TypeFilter
@@ -15,6 +19,7 @@ import kotlinx.coroutines.launch
 
 class RealMediaStoreComponent(
     componentContext: ComponentContext,
+    private val componentToast: ComponentToast,
     private val logger: Logger,
     private val currentTime: CurrentTime,
     private val mediaStore: MediaStoreGateway
@@ -81,8 +86,12 @@ class RealMediaStoreComponent(
 
     override fun onFileRemoveClick(uri: Uri) {
         coroutineScope.launch {
-            mediaStore.removeMediaFile(uri)
-            refresh()
+            if(mediaStore.removeMediaFile(uri)) {
+                refresh()
+                componentToast.show(R.string.media_store_file_remove_completed)
+            } else {
+                componentToast.show(R.string.media_store_file_remove_error)
+            }
         }
     }
 

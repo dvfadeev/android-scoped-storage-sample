@@ -1,5 +1,6 @@
 package com.example.scoped_storage_example.modules.media_store.data
 
+import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
@@ -204,10 +205,21 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
     /**
      * Remove file from media storage
      * It will be removed from disk as well
+     * On Android 10 and above, removing files that other apps own is restricted
+     * @return operation result
      */
-    override suspend fun removeMediaFile(uri: Uri) = withContext(Dispatchers.IO) {
+    override suspend fun removeMediaFile(uri: Uri): Boolean = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
-        resolver.delete(uri, null, null)
-        return@withContext
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                resolver.delete(uri, null, null)
+            }
+            catch (e: RecoverableSecurityException) {
+                return@withContext false
+            }
+        } else {
+            resolver.delete(uri, null, null)
+        }
+        return@withContext true
     }
 }

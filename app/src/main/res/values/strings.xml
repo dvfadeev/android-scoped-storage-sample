@@ -24,6 +24,8 @@
     <string name="media_store_file">file</string>
     <string name="media_store_take_photo">Take photo</string>
     <string name="media_store_file_remove">Remove</string>
+    <string name="media_store_file_remove_completed">File removed</string>
+    <string name="media_store_file_remove_error">On Android 10 and above, removing files that other apps own is restricted!</string>
     <string name="media_store_file_name">Name:</string>
     <string name="media_store_file_title">Title:</string>
     <string name="media_store_file_path">Path:</string>
