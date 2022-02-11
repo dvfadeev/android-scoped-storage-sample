@@ -60,6 +60,7 @@ class RealMediaStoreComponent(
             val fileName = "photo " + currentTime.currentTimeString
             mediaStore.writeImage(fileName, bitmap)
             logger.log("$fileName saved")
+            componentToast.show(R.string.media_store_take_photo_completed)
             refresh()
         }
     }
@@ -76,7 +77,7 @@ class RealMediaStoreComponent(
                 selectedMediaFile = it.toViewData()
                 isShowImageFileContent = true
                 logger.log("Image ${it.name} loaded")
-            }
+            } ?: componentToast.show(R.string.media_store_file_open_fail)
         }
     }
 

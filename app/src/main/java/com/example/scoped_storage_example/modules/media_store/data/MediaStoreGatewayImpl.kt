@@ -80,8 +80,6 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
                     else -> null
                 }
 
-                //      val uriColumn = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-
                 val uri = uriColumn?.let {
                     ContentUris.withAppendedId(it, id)
                 }

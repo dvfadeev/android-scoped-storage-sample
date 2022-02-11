@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -320,11 +321,13 @@ private fun MediaFileItem(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val fileOpenFailedToast = Toast.makeText(
+        LocalContext.current,
+        stringResource(id = R.string.media_store_file_open_fail),
+        Toast.LENGTH_SHORT
+    )
 
-    Box(
-        modifier = modifier.fillMaxWidth()
-
-    ) {
+    Box(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -332,13 +335,13 @@ private fun MediaFileItem(
                     onClick = {
                         data.uri?.let {
                             onFileClick(it)
-                        }
+                        } ?: fileOpenFailedToast.show()
                     },
                     onLongClick = {
                         data.uri?.let {
                             expanded = true
                             onFileLongClick(it)
-                        }
+                        } ?: fileOpenFailedToast.show()
                     }
                 )
                 .padding(start = 8.dp, end = 8.dp, top = 8.dp)

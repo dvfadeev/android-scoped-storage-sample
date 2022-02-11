@@ -11,6 +11,7 @@
     <string name="app_storage_type_external">External</string>
     <string name="app_storage_save_log_text">If you click on the button, the logs will be saved in the app storage.</string>
     <string name="app_storage_save_log_button">Press to save</string>
+    <string name="app_storage_save_log_completed">Log saved</string>
     <string name="app_storage_current_storage">Current app storage:</string>
     <string name="app_storage_available_space">Available disk space:</string>
     <string name="app_storage_file_name">File name:</string>
@@ -23,9 +24,11 @@
     <string name="media_store_remove_file_permission_request">To remove file you have to grant write external storage permission</string>
     <string name="media_store_file">file</string>
     <string name="media_store_take_photo">Take photo</string>
+    <string name="media_store_take_photo_completed">Photo saved</string>
     <string name="media_store_file_remove">Remove</string>
     <string name="media_store_file_remove_completed">File removed</string>
     <string name="media_store_file_remove_error">On Android 10 and above, removing files that other apps own is restricted!</string>
+    <string name="media_store_file_open_fail">Failed to open media file</string>
     <string name="media_store_file_name">Name:</string>
     <string name="media_store_file_title">Title:</string>
     <string name="media_store_file_path">Path:</string>
@@ -43,6 +46,7 @@
     <string name="file_picker_launch_text">Press button to open native file picker</string>
     <string name="file_picker_launch_multiply_text">Press button to open native multiply files picker (hold to select file)</string>
     <string name="file_picker_filter_text">You can change the type of selected files</string>
+    <string name="file_picker_file_open_fail">Failed to open document file</string>
     <string name="file_picker_previous">Previous</string>
     <string name="file_picker_next">Next</string>
     <string name="file_picker_file_name">Name:</string>

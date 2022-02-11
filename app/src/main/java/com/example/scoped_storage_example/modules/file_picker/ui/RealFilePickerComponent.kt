@@ -5,6 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
+import com.example.scoped_storage_example.R
+import com.example.scoped_storage_example.core.data.ComponentToast
 import com.example.scoped_storage_example.core.data.Logger
 import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
@@ -13,6 +15,7 @@ import kotlinx.coroutines.launch
 
 class RealFilePickerComponent(
     componentContext: ComponentContext,
+    private val componentToast: ComponentToast,
     private val logger: Logger,
     private val mediaStore: FilePickerGateway
 ) : ComponentContext by componentContext, FilePickerComponent {
@@ -36,7 +39,7 @@ class RealFilePickerComponent(
             mediaStore.openDocument(uri)?.let {
                 documentFiles = listOf(it.toViewData())
                 logger.log("File opened")
-            }
+            } ?: componentToast.show(R.string.file_picker_file_open_fail)
         }
     }
 
