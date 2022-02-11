@@ -246,7 +246,11 @@ private fun FileContent(
                 FileField(title = stringResource(id = R.string.media_store_file_mime_type), text = file.mimeType)
                 FileField(title = stringResource(id = R.string.media_store_file_size), text = file.size)
                 FileField(title = stringResource(id = R.string.media_store_file_date_added), text = file.dateAdded)
-                FileField(title = stringResource(id = R.string.media_store_file_date_taken), text = file.dateTaken)
+
+                file.dateTaken?.let {
+                    FileField(title = stringResource(id = R.string.media_store_file_date_taken), text = it)
+                }
+
                 FileField(title = stringResource(id = R.string.media_store_file_description), text = file.description)
 
                 file.resolution?.let {

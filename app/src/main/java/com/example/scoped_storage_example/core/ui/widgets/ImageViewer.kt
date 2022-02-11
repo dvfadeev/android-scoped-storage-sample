@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.decode.VideoFrameDecoder
 import com.example.scoped_storage_example.R
+import com.example.scoped_storage_example.core.utils.FileTypes
 
 @Composable
 fun ImageViewer(
@@ -23,24 +24,26 @@ fun ImageViewer(
     type: String,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
+    if (type.startsWith(FileTypes.MIME_TYPE_IMAGE_ALL) || type.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
+        val context = LocalContext.current
 
-    Image(
-        modifier = modifier
-            .size(size)
-            .clip(RoundedCornerShape(8.dp)),
-        painter = rememberImagePainter(
-            uri,
-            builder = {
-                with(LocalDensity.current) { size(size.roundToPx()) }
-                placeholder(R.color.cardview_dark_background)
-                if (type.startsWith("video")) {
-                    decoder(VideoFrameDecoder(context))
-                    crossfade(true)
+        Image(
+            modifier = modifier
+                .size(size)
+                .clip(RoundedCornerShape(8.dp)),
+            painter = rememberImagePainter(
+                uri,
+                builder = {
+                    with(LocalDensity.current) { size(size.roundToPx()) }
+                    placeholder(R.color.cardview_dark_background)
+                    if (type.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
+                        decoder(VideoFrameDecoder(context))
+                        crossfade(true)
+                    }
                 }
-            }
-        ),
-        contentScale = ContentScale.Fit,
-        contentDescription = null
-    )
+            ),
+            contentScale = ContentScale.Fit,
+            contentDescription = null
+        )
+    }
 }
