@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
+import com.example.scoped_storage_example.R
+import com.example.scoped_storage_example.core.data.ComponentToast
 import com.example.scoped_storage_example.core.utils.FileTypes
 import com.example.scoped_storage_example.core.data.Logger
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
  */
 class RealAppStorageComponent(
     componentContext: ComponentContext,
+    private val componentToast: ComponentToast,
     private val logger: Logger,
     private val internalStorage: AppStorageGatewayInternal,
     private val externalStorage: AppStorageGatewayExternal
@@ -59,6 +62,7 @@ class RealAppStorageComponent(
                 type = FileTypes.TYPE_TEXT,
                 content = session.logs
             )
+            componentToast.show(R.string.app_storage_save_log_completed)
             refreshFiles()
         }
     }
