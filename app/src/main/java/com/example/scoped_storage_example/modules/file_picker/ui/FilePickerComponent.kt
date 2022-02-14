@@ -9,13 +9,23 @@ interface FilePickerComponent {
 
     val documentFiles: List<DocumentFileViewData>
 
+    val fileName: String?
+
     fun onChangeFilter(filter: TypeFilter)
 
     fun onOpenFileClick(uri: Uri)
 
     fun onOpenFilesClick(uris: List<Uri>)
 
+    fun onRemoveFileClick(uri: Uri)
+
+    // File rename dialog
+
     fun onOpenRenameDialogClick(uri: Uri)
 
-    fun onRemoveFileClick(uri: Uri)
+    fun onFileNameTextChanged(name: String)
+
+    fun onRenameFileAcceptClick()
+
+    fun onRenameFileCancelClick()
 }

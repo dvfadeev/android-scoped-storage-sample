@@ -57,6 +57,9 @@
     <string name="file_picker_file_date_modified">Date modified:</string>
     <string name="file_picker_file_icon">Icon:</string>
     <string name="file_picker_file_summary">Summary:</string>
+    <string name="file_picker_rename_enter_new_name">Enter a new file name</string>
+    <string name="file_picker_rename_accept">Accept</string>
+    <string name="file_picker_rename_cancel">Cancel</string>
     <string name="file_picker_file_remove">Remove</string>
     <string name="file_picker_file_removed">File removed</string>
     <string name="file_picker_file_remove_error">Failed to remove file</string>

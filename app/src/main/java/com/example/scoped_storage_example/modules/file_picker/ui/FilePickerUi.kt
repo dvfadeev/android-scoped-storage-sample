@@ -3,6 +3,7 @@ package com.example.scoped_storage_example.modules.file_picker.ui
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,10 +49,14 @@ fun FilePickerUi(
                 modifier = Modifier.padding(it),
                 filter = component.filter,
                 documentFiles = component.documentFiles,
+                fileName = component.fileName,
                 onChangeFilter = component::onChangeFilter,
                 onOpenFileClick = component::onOpenFileClick,
                 onOpenFilesClick = component::onOpenFilesClick,
                 onOpenRenameDialogClick = component::onOpenRenameDialogClick,
+                onFileNameTextChanged = component::onFileNameTextChanged,
+                onRenameFileAcceptClick = component::onRenameFileAcceptClick,
+                onRenameFileCancelClick = component::onRenameFileCancelClick,
                 onRemoveFileClick = component::onRemoveFileClick
             )
         }
@@ -64,10 +69,14 @@ private fun FilePickerContent(
     modifier: Modifier = Modifier,
     filter: TypeFilter,
     documentFiles: List<DocumentFileViewData>,
+    fileName: String?,
     onChangeFilter: (TypeFilter) -> Unit,
     onOpenFileClick: (Uri) -> Unit,
     onOpenFilesClick: (List<Uri>) -> Unit,
     onOpenRenameDialogClick: (Uri) -> Unit,
+    onFileNameTextChanged: (String) -> Unit,
+    onRenameFileAcceptClick: () -> Unit,
+    onRenameFileCancelClick: () -> Unit,
     onRemoveFileClick: (Uri) -> Unit
 ) {
     val pickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -79,91 +88,102 @@ private fun FilePickerContent(
         onOpenFilesClick(uris)
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
 
-        FilterSelector(
-            filter = filter,
-            onChangeFilter = onChangeFilter,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-
-        CustomCard(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(all = 16.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.file_picker_launch_text),
-                    modifier = Modifier.weight(1f)
-                )
-                ControlButton(
-                    text = stringResource(id = R.string.file_picker_launch),
-                    onClick = { pickerLauncher.launch(arrayOf(filter.mime)) }
-                )
-            }
-        }
-
-        CustomCard(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(all = 16.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.file_picker_launch_multiply_text),
-                    modifier = Modifier.weight(1f)
-                )
-                ControlButton(
-                    text = stringResource(id = R.string.file_picker_launch),
-                    onClick = { multiplePickerLauncher.launch(arrayOf(filter.mime)) }
-                )
-            }
-        }
-
-        if (documentFiles.isNotEmpty()) {
-            val scope = rememberCoroutineScope()
-            val size = documentFiles.size
-            val pagerState = rememberPagerState(pageCount = documentFiles.size, initialOffscreenLimit = 2)
-            val page = pagerState.currentPage
-
-            PageSwitcher(
-                isPreviousEnabled = size > 1 && page > 0,
-                isNextEnabled = size > 1 && page < size - 1,
-                onPreviousClick = {
-                    scope.launch {
-                        pagerState.scrollToPage(page - 1)
-                    }
-                },
-                onNextClick = {
-                    scope.launch {
-                        pagerState.scrollToPage(page + 1)
-                    }
-                },
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
+            FilterSelector(
+                filter = filter,
+                onChangeFilter = onChangeFilter,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            HorizontalPager(
-                state = pagerState
-            ) {
-                if (size > it) {
-                    val file = documentFiles[it]
-                    DocumentFileItem(
-                        data = file,
-                        onOpenRenameDialogClick = { onOpenRenameDialogClick(file.uri) },
-                        onRemoveFileClick = { onRemoveFileClick(file.uri) }
+            CustomCard(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(all = 16.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.file_picker_launch_text),
+                        modifier = Modifier.weight(1f)
+                    )
+                    ControlButton(
+                        text = stringResource(id = R.string.file_picker_launch),
+                        onClick = { pickerLauncher.launch(arrayOf(filter.mime)) }
                     )
                 }
             }
+
+            CustomCard(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(all = 16.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.file_picker_launch_multiply_text),
+                        modifier = Modifier.weight(1f)
+                    )
+                    ControlButton(
+                        text = stringResource(id = R.string.file_picker_launch),
+                        onClick = { multiplePickerLauncher.launch(arrayOf(filter.mime)) }
+                    )
+                }
+            }
+
+            if (documentFiles.isNotEmpty()) {
+                val scope = rememberCoroutineScope()
+                val size = documentFiles.size
+                val pagerState = rememberPagerState(pageCount = documentFiles.size, initialOffscreenLimit = 2)
+                val page = pagerState.currentPage
+
+                PageSwitcher(
+                    isPreviousEnabled = size > 1 && page > 0,
+                    isNextEnabled = size > 1 && page < size - 1,
+                    onPreviousClick = {
+                        scope.launch {
+                            pagerState.scrollToPage(page - 1)
+                        }
+                    },
+                    onNextClick = {
+                        scope.launch {
+                            pagerState.scrollToPage(page + 1)
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                )
+
+                HorizontalPager(
+                    state = pagerState
+                ) {
+                    if (size > it) {
+                        val file = documentFiles[it]
+                        DocumentFileItem(
+                            data = file,
+                            onOpenRenameDialogClick = { onOpenRenameDialogClick(file.uri) },
+                            onRemoveFileClick = { onRemoveFileClick(file.uri) }
+                        )
+                    }
+                }
+            }
+        }
+
+        if (fileName != null) {
+            RenameFileDialog(
+                fileName = fileName,
+                onTextChanged = onFileNameTextChanged,
+                onAcceptClick = onRenameFileAcceptClick,
+                onCancelClick = onRenameFileCancelClick
+            )
         }
     }
 }
@@ -315,6 +335,50 @@ private fun DocumentFileItem(
 }
 
 @Composable
+private fun RenameFileDialog(
+    fileName: String,
+    onAcceptClick: () -> Unit,
+    onCancelClick: () -> Unit,
+    onTextChanged: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancelClick,
+        title = null,
+        text = {
+            Column {
+                Text(
+                    text = stringResource(id = R.string.file_picker_rename_enter_new_name),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                OutlinedTextField(
+                    value = fileName,
+                    onValueChange = onTextChanged
+                )
+            }
+        },
+        buttons = {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+            ) {
+                SelectableButton(
+                    text = stringResource(id = R.string.file_picker_rename_cancel),
+                    isSelected = false,
+                    onClick = onCancelClick,
+                    modifier = Modifier.weight(1f)
+                )
+                SelectableButton(
+                    text = stringResource(id = R.string.file_picker_rename_accept),
+                    isSelected = true,
+                    onClick = onAcceptClick,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    )
+}
+
+@Composable
 private fun CustomCard(
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colors.background,
@@ -365,13 +429,21 @@ class FakeFilePickerComponent : FilePickerComponent {
 
     override var documentFiles: List<DocumentFileViewData> = listOf()
 
+    override val fileName: String? = null
+
     override fun onChangeFilter(filter: TypeFilter) = Unit
 
     override fun onOpenFileClick(uri: Uri) = Unit
 
     override fun onOpenFilesClick(uris: List<Uri>) = Unit
 
+    override fun onRemoveFileClick(uri: Uri) = Unit
+
     override fun onOpenRenameDialogClick(uri: Uri) = Unit
 
-    override fun onRemoveFileClick(uri: Uri) = Unit
+    override fun onFileNameTextChanged(name: String) = Unit
+
+    override fun onRenameFileAcceptClick() = Unit
+
+    override fun onRenameFileCancelClick() = Unit
 }

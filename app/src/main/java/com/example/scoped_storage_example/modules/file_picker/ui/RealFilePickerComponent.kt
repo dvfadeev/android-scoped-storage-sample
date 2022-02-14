@@ -26,6 +26,8 @@ class RealFilePickerComponent(
 
     override var documentFiles: List<DocumentFileViewData> by mutableStateOf(listOf())
 
+    override var fileName: String? by mutableStateOf(null)
+
     init {
         logger.log("Init FilePicker")
     }
@@ -50,10 +52,6 @@ class RealFilePickerComponent(
         }
     }
 
-    override fun onOpenRenameDialogClick(uri: Uri) {
-        // TODO
-    }
-
     override fun onRemoveFileClick(uri: Uri) {
         coroutineScope.launch {
             val result = filePicker.removeDocument(uri)
@@ -67,5 +65,23 @@ class RealFilePickerComponent(
                 logger.log("File remove failed")
             }
         }
+    }
+
+    override fun onOpenRenameDialogClick(uri: Uri) {
+        documentFiles.find { it.uri == uri }?.let {
+            fileName = it.name
+        }
+    }
+
+    override fun onFileNameTextChanged(name: String) {
+        fileName = name
+    }
+
+    override fun onRenameFileAcceptClick() {
+        fileName = null
+    }
+
+    override fun onRenameFileCancelClick() {
+        fileName = null
     }
 }
