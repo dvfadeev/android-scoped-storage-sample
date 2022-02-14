@@ -55,6 +55,7 @@ fun FilePickerUi(
     )
 }
 
+
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun FilePickerContent(
@@ -65,12 +66,12 @@ private fun FilePickerContent(
     onOpenFile: (Uri) -> Unit,
     onOpenFiles: (List<Uri>) -> Unit
 ) {
-    val pickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    val pickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let {
             onOpenFile(uri)
         }
     }
-    val multiplePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+    val multiplePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         onOpenFiles(uris)
     }
 
@@ -101,7 +102,7 @@ private fun FilePickerContent(
                 )
                 ControlButton(
                     text = stringResource(id = R.string.file_picker_launch),
-                    onClick = { pickerLauncher.launch(filter.mime) }
+                    onClick = { pickerLauncher.launch(arrayOf(filter.mime)) }
                 )
             }
         }
@@ -119,7 +120,7 @@ private fun FilePickerContent(
                 )
                 ControlButton(
                     text = stringResource(id = R.string.file_picker_launch),
-                    onClick = { multiplePickerLauncher.launch(filter.mime) }
+                    onClick = { multiplePickerLauncher.launch(arrayOf(filter.mime)) }
                 )
             }
         }
