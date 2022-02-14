@@ -7,11 +7,13 @@ interface FilePickerComponent {
 
     val filter: TypeFilter
 
-    val documentFiles: List<DocumentFileViewData>?
+    val documentFiles: List<DocumentFileViewData>
 
     fun onChangeFilter(filter: TypeFilter)
 
-    fun onOpenFile(uri: Uri)
+    fun onOpenFileClick(uri: Uri)
 
-    fun onOpenFiles(uris: List<Uri>)
+    fun onOpenFilesClick(uris: List<Uri>)
+
+    fun onRemoveFileClick(uri: Uri)
 }

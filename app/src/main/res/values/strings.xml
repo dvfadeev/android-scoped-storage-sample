@@ -57,6 +57,10 @@
     <string name="file_picker_file_date_modified">Date modified:</string>
     <string name="file_picker_file_icon">Icon:</string>
     <string name="file_picker_file_summary">Summary:</string>
+    <string name="file_picker_file_remove">Remove</string>
+    <string name="file_picker_file_removed">File removed</string>
+    <string name="file_picker_file_remove_error">Failed to remove file</string>
+
 
     <!-- Filter -->
     <string name="filter_title">Filter</string>

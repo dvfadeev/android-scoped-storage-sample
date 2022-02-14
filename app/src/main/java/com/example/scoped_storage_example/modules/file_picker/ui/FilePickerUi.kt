@@ -48,31 +48,32 @@ fun FilePickerUi(
                 filter = component.filter,
                 documentFiles = component.documentFiles,
                 onChangeFilter = component::onChangeFilter,
-                onOpenFile = component::onOpenFile,
-                onOpenFiles = component::onOpenFiles
+                onOpenFileClick = component::onOpenFileClick,
+                onOpenFilesClick = component::onOpenFilesClick,
+                onRemoveFileClick = component::onRemoveFileClick
             )
         }
     )
 }
-
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun FilePickerContent(
     modifier: Modifier = Modifier,
     filter: TypeFilter,
-    documentFiles: List<DocumentFileViewData>?,
+    documentFiles: List<DocumentFileViewData>,
     onChangeFilter: (TypeFilter) -> Unit,
-    onOpenFile: (Uri) -> Unit,
-    onOpenFiles: (List<Uri>) -> Unit
+    onOpenFileClick: (Uri) -> Unit,
+    onOpenFilesClick: (List<Uri>) -> Unit,
+    onRemoveFileClick: (Uri) -> Unit
 ) {
     val pickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let {
-            onOpenFile(uri)
+            onOpenFileClick(uri)
         }
     }
     val multiplePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
-        onOpenFiles(uris)
+        onOpenFilesClick(uris)
     }
 
     Column(
@@ -125,7 +126,7 @@ private fun FilePickerContent(
             }
         }
 
-        if (documentFiles != null) {
+        if (documentFiles.isNotEmpty()) {
             val scope = rememberCoroutineScope()
             val size = documentFiles.size
             val pagerState = rememberPagerState(pageCount = documentFiles.size, initialOffscreenLimit = 2)
@@ -152,7 +153,11 @@ private fun FilePickerContent(
                 state = pagerState
             ) {
                 if (size > it) {
-                    DocumentFileItem(data = documentFiles[it])
+                    val file = documentFiles[it]
+                    DocumentFileItem(
+                        data = file,
+                        onClick = { onRemoveFileClick(file.uri) }
+                    )
                 }
             }
         }
@@ -240,6 +245,7 @@ private fun PageSwitcher(
 @Composable
 private fun DocumentFileItem(
     data: DocumentFileViewData,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     CustomCard(modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp)) {
@@ -262,6 +268,12 @@ private fun DocumentFileItem(
             data.summary?.let {
                 DocumentFileField(title = stringResource(id = R.string.file_picker_file_summary), text = it)
             }
+
+            ControlButton(
+                text = stringResource(id = R.string.file_picker_file_remove),
+                onClick = onClick,
+                modifier = Modifier.align(Alignment.End)
+            )
 
             val conf = LocalConfiguration.current
             val size = conf.screenWidthDp.dp - 96.dp
@@ -324,11 +336,13 @@ class FakeFilePickerComponent : FilePickerComponent {
 
     override var filter: TypeFilter = TypeFilter.All
 
-    override var documentFiles: List<DocumentFileViewData>? = null
+    override var documentFiles: List<DocumentFileViewData> = listOf()
 
     override fun onChangeFilter(filter: TypeFilter) = Unit
 
-    override fun onOpenFile(uri: Uri) = Unit
+    override fun onOpenFileClick(uri: Uri) = Unit
 
-    override fun onOpenFiles(uris: List<Uri>) = Unit
+    override fun onOpenFilesClick(uris: List<Uri>) = Unit
+
+    override fun onRemoveFileClick(uri: Uri) = Unit
 }

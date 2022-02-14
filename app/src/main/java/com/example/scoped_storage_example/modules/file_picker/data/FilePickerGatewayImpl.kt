@@ -6,6 +6,7 @@ import android.provider.DocumentsContract
 import com.example.scoped_storage_example.modules.file_picker.data.models.DocumentFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.FileNotFoundException
 
 /**
  * File picker only returns document uri,
@@ -76,5 +77,36 @@ class FilePickerGatewayImpl(private val context: Context) : FilePickerGateway {
         }
 
         return result
+    }
+
+    /**
+     * Remove document file by uri
+     * @return operation result
+     */
+    override suspend fun removeDocument(uri: Uri): Boolean = withContext(Dispatchers.IO) {
+        val resolver = context.contentResolver
+
+        resolver.query(
+            uri,
+            arrayOf(DocumentsContract.Document.COLUMN_FLAGS),
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            cursor.moveToFirst()
+            val flags = cursor.getInt(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_FLAGS))
+            val isSupportsDelete =
+                flags and DocumentsContract.Document.FLAG_SUPPORTS_DELETE == DocumentsContract.Document.FLAG_SUPPORTS_DELETE
+
+            if (isSupportsDelete) {
+                try {
+                    DocumentsContract.deleteDocument(resolver, uri)
+                    return@withContext true
+                } catch (e: FileNotFoundException) {
+                    return@withContext false
+                }
+            }
+        }
+        return@withContext false
     }
 }

@@ -17,14 +17,14 @@ class RealFilePickerComponent(
     componentContext: ComponentContext,
     private val componentToast: ComponentToast,
     private val logger: Logger,
-    private val mediaStore: FilePickerGateway
+    private val filePicker: FilePickerGateway
 ) : ComponentContext by componentContext, FilePickerComponent {
 
     private val coroutineScope = componentCoroutineScope()
 
     override var filter: TypeFilter by mutableStateOf(TypeFilter.All)
 
-    override var documentFiles: List<DocumentFileViewData>? by mutableStateOf(null)
+    override var documentFiles: List<DocumentFileViewData> by mutableStateOf(listOf())
 
     init {
         logger.log("Init FilePicker")
@@ -34,19 +34,34 @@ class RealFilePickerComponent(
         this.filter = filter
     }
 
-    override fun onOpenFile(uri: Uri) {
+    override fun onOpenFileClick(uri: Uri) {
         coroutineScope.launch {
-            mediaStore.openDocument(uri)?.let {
+            filePicker.openDocument(uri)?.let {
                 documentFiles = listOf(it.toViewData())
                 logger.log("File opened")
             } ?: componentToast.show(R.string.file_picker_file_open_fail)
         }
     }
 
-    override fun onOpenFiles(uris: List<Uri>) {
+    override fun onOpenFilesClick(uris: List<Uri>) {
         coroutineScope.launch {
-            documentFiles = mediaStore.openDocuments(uris).map { it.toViewData() }
+            documentFiles = filePicker.openDocuments(uris).map { it.toViewData() }
             logger.log("Files opened")
+        }
+    }
+
+    override fun onRemoveFileClick(uri: Uri) {
+        coroutineScope.launch {
+            val result = filePicker.removeDocument(uri)
+
+            if (result) {
+                componentToast.show(R.string.file_picker_file_removed)
+                documentFiles = documentFiles.filter { it.uri != uri }
+                logger.log("File removed")
+            } else {
+                componentToast.show(R.string.file_picker_file_remove_error)
+                logger.log("File remove failed")
+            }
         }
     }
 }

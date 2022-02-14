@@ -8,4 +8,6 @@ interface FilePickerGateway {
     suspend fun openDocument(uri: Uri): DocumentFile?
 
     suspend fun openDocuments(uris: List<Uri>): List<DocumentFile>
+
+    suspend fun removeDocument(uri: Uri): Boolean
 }
