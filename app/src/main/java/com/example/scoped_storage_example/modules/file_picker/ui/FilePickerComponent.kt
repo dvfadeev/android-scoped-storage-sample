@@ -15,5 +15,7 @@ interface FilePickerComponent {
 
     fun onOpenFilesClick(uris: List<Uri>)
 
+    fun onOpenRenameDialogClick(uri: Uri)
+
     fun onRemoveFileClick(uri: Uri)
 }

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,6 +51,7 @@ fun FilePickerUi(
                 onChangeFilter = component::onChangeFilter,
                 onOpenFileClick = component::onOpenFileClick,
                 onOpenFilesClick = component::onOpenFilesClick,
+                onOpenRenameDialogClick = component::onOpenRenameDialogClick,
                 onRemoveFileClick = component::onRemoveFileClick
             )
         }
@@ -65,6 +67,7 @@ private fun FilePickerContent(
     onChangeFilter: (TypeFilter) -> Unit,
     onOpenFileClick: (Uri) -> Unit,
     onOpenFilesClick: (List<Uri>) -> Unit,
+    onOpenRenameDialogClick: (Uri) -> Unit,
     onRemoveFileClick: (Uri) -> Unit
 ) {
     val pickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -156,7 +159,8 @@ private fun FilePickerContent(
                     val file = documentFiles[it]
                     DocumentFileItem(
                         data = file,
-                        onClick = { onRemoveFileClick(file.uri) }
+                        onOpenRenameDialogClick = { onOpenRenameDialogClick(file.uri) },
+                        onRemoveFileClick = { onRemoveFileClick(file.uri) }
                     )
                 }
             }
@@ -245,7 +249,8 @@ private fun PageSwitcher(
 @Composable
 private fun DocumentFileItem(
     data: DocumentFileViewData,
-    onClick: () -> Unit,
+    onOpenRenameDialogClick: () -> Unit,
+    onRemoveFileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     CustomCard(modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp)) {
@@ -253,7 +258,26 @@ private fun DocumentFileItem(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(16.dp)
         ) {
-            DocumentFileField(title = stringResource(id = R.string.file_picker_file_name), text = data.name)
+
+            DocumentFileField(
+                title = stringResource(id = R.string.file_picker_file_name),
+                text = data.name,
+                icon = {
+                    IconButton(
+                        onClick = onOpenRenameDialogClick,
+                        modifier = Modifier
+                            .padding(start = 12.dp)
+                            .size(16.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(android.R.drawable.ic_menu_edit),
+                            contentDescription = null,
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                }
+            )
+
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_id), text = data.id)
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_flags), text = data.flags)
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_mime_type), text = data.mimeType)
@@ -271,7 +295,7 @@ private fun DocumentFileItem(
 
             ControlButton(
                 text = stringResource(id = R.string.file_picker_file_remove),
-                onClick = onClick,
+                onClick = onRemoveFileClick,
                 modifier = Modifier.align(Alignment.End)
             )
 
@@ -307,7 +331,8 @@ private fun CustomCard(
 @Composable
 private fun DocumentFileField(
     title: String,
-    text: String
+    text: String,
+    icon: @Composable (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
@@ -321,6 +346,8 @@ private fun DocumentFileField(
             text = text,
             style = MaterialTheme.typography.caption
         )
+
+        icon?.invoke()
     }
 }
 
@@ -343,6 +370,8 @@ class FakeFilePickerComponent : FilePickerComponent {
     override fun onOpenFileClick(uri: Uri) = Unit
 
     override fun onOpenFilesClick(uris: List<Uri>) = Unit
+
+    override fun onOpenRenameDialogClick(uri: Uri) = Unit
 
     override fun onRemoveFileClick(uri: Uri) = Unit
 }

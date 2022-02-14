@@ -50,6 +50,10 @@ class RealFilePickerComponent(
         }
     }
 
+    override fun onOpenRenameDialogClick(uri: Uri) {
+        // TODO
+    }
+
     override fun onRemoveFileClick(uri: Uri) {
         coroutineScope.launch {
             val result = filePicker.removeDocument(uri)
