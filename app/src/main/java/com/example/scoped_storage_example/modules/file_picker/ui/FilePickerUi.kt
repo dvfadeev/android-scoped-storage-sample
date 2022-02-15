@@ -3,7 +3,6 @@ package com.example.scoped_storage_example.modules.file_picker.ui
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -347,7 +346,7 @@ private fun RenameFileDialog(
         text = {
             Column {
                 Text(
-                    text = stringResource(id = R.string.file_picker_rename_enter_new_name),
+                    text = stringResource(id = R.string.file_picker_file_rename_title),
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
@@ -358,17 +357,18 @@ private fun RenameFileDialog(
             }
         },
         buttons = {
-            Row(modifier = Modifier
-                .fillMaxWidth()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
                 SelectableButton(
-                    text = stringResource(id = R.string.file_picker_rename_cancel),
+                    text = stringResource(id = R.string.file_picker_file_rename_cancel),
                     isSelected = false,
                     onClick = onCancelClick,
                     modifier = Modifier.weight(1f)
                 )
                 SelectableButton(
-                    text = stringResource(id = R.string.file_picker_rename_accept),
+                    text = stringResource(id = R.string.file_picker_file_rename_accept),
                     isSelected = true,
                     onClick = onAcceptClick,
                     modifier = Modifier.weight(1f)

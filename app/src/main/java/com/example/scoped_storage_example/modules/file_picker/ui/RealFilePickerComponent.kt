@@ -28,6 +28,8 @@ class RealFilePickerComponent(
 
     override var fileName: String? by mutableStateOf(null)
 
+    private var fileUri: Uri? = null
+
     init {
         logger.log("Init FilePicker")
     }
@@ -38,17 +40,13 @@ class RealFilePickerComponent(
 
     override fun onOpenFileClick(uri: Uri) {
         coroutineScope.launch {
-            filePicker.openDocument(uri)?.let {
-                documentFiles = listOf(it.toViewData())
-                logger.log("File opened")
-            } ?: componentToast.show(R.string.file_picker_file_open_fail)
+            loadDocument(uri)
         }
     }
 
     override fun onOpenFilesClick(uris: List<Uri>) {
         coroutineScope.launch {
-            documentFiles = filePicker.openDocuments(uris).map { it.toViewData() }
-            logger.log("Files opened")
+            loadDocuments(uris)
         }
     }
 
@@ -58,7 +56,7 @@ class RealFilePickerComponent(
 
             if (result) {
                 componentToast.show(R.string.file_picker_file_removed)
-                documentFiles = documentFiles.filter { it.uri != uri }
+                loadDocuments(documentFiles.map { it.uri }.filter { it != uri })
                 logger.log("File removed")
             } else {
                 componentToast.show(R.string.file_picker_file_remove_error)
@@ -69,6 +67,7 @@ class RealFilePickerComponent(
 
     override fun onOpenRenameDialogClick(uri: Uri) {
         documentFiles.find { it.uri == uri }?.let {
+            fileUri = uri
             fileName = it.name
         }
     }
@@ -78,10 +77,38 @@ class RealFilePickerComponent(
     }
 
     override fun onRenameFileAcceptClick() {
-        fileName = null
+        coroutineScope.launch {
+            fileUri?.let { uri ->
+                fileName?.let { name ->
+                    val result = filePicker.renameDocument(uri, name)
+
+                    if (result) {
+                        loadDocuments(documentFiles.map { it.uri }.filter { it != uri })
+                        componentToast.show(R.string.file_picker_file_renamed)
+                        logger.log("File renamed")
+                    } else {
+                        componentToast.show(R.string.file_picker_file_rename_error)
+                        logger.log("File rename failed")
+                    }
+                }
+            }
+            fileName = null
+        }
     }
 
     override fun onRenameFileCancelClick() {
         fileName = null
+    }
+
+    private suspend fun loadDocument(uri: Uri) {
+        filePicker.openDocument(uri)?.let {
+            documentFiles = listOf(it.toViewData())
+            logger.log("File opened")
+        } ?: componentToast.show(R.string.file_picker_file_open_fail)
+    }
+
+    private suspend fun loadDocuments(uris: List<Uri>) {
+        documentFiles = filePicker.openDocuments(uris).map { it.toViewData() }
+        logger.log("Files opened")
     }
 }
