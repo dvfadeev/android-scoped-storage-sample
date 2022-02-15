@@ -9,7 +9,7 @@ interface FilePickerComponent {
 
     val documentFiles: List<DocumentFileViewData>
 
-    val fileName: String?
+    val documentFileName: DocumentFileNameViewData?
 
     fun onChangeFilter(filter: TypeFilter)
 

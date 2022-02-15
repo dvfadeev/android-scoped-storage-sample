@@ -26,9 +26,7 @@ class RealFilePickerComponent(
 
     override var documentFiles: List<DocumentFileViewData> by mutableStateOf(listOf())
 
-    override var fileName: String? by mutableStateOf(null)
-
-    private var fileUri: Uri? = null
+    override var documentFileName: DocumentFileNameViewData? by mutableStateOf(null)
 
     init {
         logger.log("Init FilePicker")
@@ -67,37 +65,35 @@ class RealFilePickerComponent(
 
     override fun onOpenRenameDialogClick(uri: Uri) {
         documentFiles.find { it.uri == uri }?.let {
-            fileUri = uri
-            fileName = it.name
+            documentFileName = DocumentFileNameViewData(uri = uri, name = it.name)
         }
     }
 
     override fun onFileNameTextChanged(name: String) {
-        fileName = name
+        documentFileName = documentFileName?.copy(name = name)
     }
 
     override fun onRenameFileAcceptClick() {
         coroutineScope.launch {
-            fileUri?.let { uri ->
-                fileName?.let { name ->
-                    val result = filePicker.renameDocument(uri, name)
+            documentFileName?.let { fileName ->
+                val result = filePicker.renameDocument(fileName.uri, fileName.name)
 
-                    if (result) {
-                        loadDocuments(documentFiles.map { it.uri }.filter { it != uri })
-                        componentToast.show(R.string.file_picker_file_renamed)
-                        logger.log("File renamed")
-                    } else {
-                        componentToast.show(R.string.file_picker_file_rename_error)
-                        logger.log("File rename failed")
-                    }
+                if (result) {
+                    loadDocuments(documentFiles.map { it.uri }.filter { it != fileName.uri })
+                    componentToast.show(R.string.file_picker_file_renamed)
+                    logger.log("File renamed")
+                } else {
+                    componentToast.show(R.string.file_picker_file_rename_error)
+                    logger.log("File rename failed")
                 }
             }
-            fileName = null
         }
+        documentFileName = null
+
     }
 
     override fun onRenameFileCancelClick() {
-        fileName = null
+        documentFileName = null
     }
 
     private suspend fun loadDocument(uri: Uri) {

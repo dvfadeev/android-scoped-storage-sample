@@ -48,7 +48,7 @@ fun FilePickerUi(
                 modifier = Modifier.padding(it),
                 filter = component.filter,
                 documentFiles = component.documentFiles,
-                fileName = component.fileName,
+                documentFileName = component.documentFileName,
                 onChangeFilter = component::onChangeFilter,
                 onOpenFileClick = component::onOpenFileClick,
                 onOpenFilesClick = component::onOpenFilesClick,
@@ -68,7 +68,7 @@ private fun FilePickerContent(
     modifier: Modifier = Modifier,
     filter: TypeFilter,
     documentFiles: List<DocumentFileViewData>,
-    fileName: String?,
+    documentFileName: DocumentFileNameViewData?,
     onChangeFilter: (TypeFilter) -> Unit,
     onOpenFileClick: (Uri) -> Unit,
     onOpenFilesClick: (List<Uri>) -> Unit,
@@ -176,9 +176,9 @@ private fun FilePickerContent(
             }
         }
 
-        if (fileName != null) {
+        if (documentFileName != null) {
             RenameFileDialog(
-                fileName = fileName,
+                documentFileName = documentFileName,
                 onTextChanged = onFileNameTextChanged,
                 onAcceptClick = onRenameFileAcceptClick,
                 onCancelClick = onRenameFileCancelClick
@@ -335,7 +335,7 @@ private fun DocumentFileItem(
 
 @Composable
 private fun RenameFileDialog(
-    fileName: String,
+    documentFileName: DocumentFileNameViewData,
     onAcceptClick: () -> Unit,
     onCancelClick: () -> Unit,
     onTextChanged: (String) -> Unit
@@ -351,7 +351,7 @@ private fun RenameFileDialog(
                 )
 
                 OutlinedTextField(
-                    value = fileName,
+                    value = documentFileName.name,
                     onValueChange = onTextChanged
                 )
             }
@@ -429,7 +429,7 @@ class FakeFilePickerComponent : FilePickerComponent {
 
     override var documentFiles: List<DocumentFileViewData> = listOf()
 
-    override val fileName: String? = null
+    override val documentFileName: DocumentFileNameViewData? = null
 
     override fun onChangeFilter(filter: TypeFilter) = Unit
 

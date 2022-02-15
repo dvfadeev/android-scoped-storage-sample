@@ -64,7 +64,6 @@ class FilePickerGatewayImpl(private val context: Context) : FilePickerGateway {
                 summary = summary
             )
         }
-
         return@withContext resultImage
     }
 
@@ -76,7 +75,6 @@ class FilePickerGatewayImpl(private val context: Context) : FilePickerGateway {
                 result.add(file)
             }
         }
-
         return result
     }
 
