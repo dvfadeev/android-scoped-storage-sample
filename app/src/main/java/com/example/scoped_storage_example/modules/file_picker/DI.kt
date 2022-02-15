@@ -6,6 +6,7 @@ import com.example.scoped_storage_example.modules.file_picker.data.FilePickerGat
 import com.example.scoped_storage_example.modules.file_picker.data.FilePickerGatewayImpl
 import com.example.scoped_storage_example.modules.file_picker.ui.FilePickerComponent
 import com.example.scoped_storage_example.modules.file_picker.ui.RealFilePickerComponent
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.get
 import org.koin.dsl.module

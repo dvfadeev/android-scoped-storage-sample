@@ -57,6 +57,14 @@
     <string name="file_picker_file_date_modified">Date modified:</string>
     <string name="file_picker_file_icon">Icon:</string>
     <string name="file_picker_file_summary">Summary:</string>
+    <string name="file_picker_file_rename_title">Enter a new file name</string>
+    <string name="file_picker_file_rename_accept">Accept</string>
+    <string name="file_picker_file_rename_cancel">Cancel</string>
+    <string name="file_picker_file_renamed">File renamed successfully</string>
+    <string name="file_picker_file_rename_error">Rename permission denied. Please try to select file from storage directory</string>
+    <string name="file_picker_file_remove">Remove</string>
+    <string name="file_picker_file_removed">File removed successfully</string>
+    <string name="file_picker_file_remove_error">Remove permission denied</string>
 
     <!-- Filter -->
     <string name="filter_title">Filter</string>

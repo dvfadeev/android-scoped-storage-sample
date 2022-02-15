@@ -17,14 +17,16 @@ class RealFilePickerComponent(
     componentContext: ComponentContext,
     private val componentToast: ComponentToast,
     private val logger: Logger,
-    private val mediaStore: FilePickerGateway
+    private val filePicker: FilePickerGateway
 ) : ComponentContext by componentContext, FilePickerComponent {
 
     private val coroutineScope = componentCoroutineScope()
 
     override var filter: TypeFilter by mutableStateOf(TypeFilter.All)
 
-    override var documentFiles: List<DocumentFileViewData>? by mutableStateOf(null)
+    override var documentFiles: List<DocumentFileViewData> by mutableStateOf(listOf())
+
+    override var documentFileName: DocumentFileNameViewData? by mutableStateOf(null)
 
     init {
         logger.log("Init FilePicker")
@@ -34,19 +36,75 @@ class RealFilePickerComponent(
         this.filter = filter
     }
 
-    override fun onOpenFile(uri: Uri) {
+    override fun onOpenFileClick(uri: Uri) {
         coroutineScope.launch {
-            mediaStore.openDocument(uri)?.let {
-                documentFiles = listOf(it.toViewData())
-                logger.log("File opened")
-            } ?: componentToast.show(R.string.file_picker_file_open_fail)
+            loadDocument(uri)
         }
     }
 
-    override fun onOpenFiles(uris: List<Uri>) {
+    override fun onOpenFilesClick(uris: List<Uri>) {
         coroutineScope.launch {
-            documentFiles = mediaStore.openDocuments(uris).map { it.toViewData() }
-            logger.log("Files opened")
+            loadDocuments(uris)
         }
+    }
+
+    override fun onRemoveFileClick(uri: Uri) {
+        coroutineScope.launch {
+            val result = filePicker.removeDocument(uri)
+
+            if (result) {
+                componentToast.show(R.string.file_picker_file_removed)
+                loadDocuments(documentFiles.map { it.uri }.filter { it != uri })
+                logger.log("File removed")
+            } else {
+                componentToast.show(R.string.file_picker_file_remove_error)
+                logger.log("File remove failed")
+            }
+        }
+    }
+
+    override fun onOpenRenameDialogClick(uri: Uri) {
+        documentFiles.find { it.uri == uri }?.let {
+            documentFileName = DocumentFileNameViewData(uri = uri, name = it.name)
+        }
+    }
+
+    override fun onFileNameTextChanged(name: String) {
+        documentFileName = documentFileName?.copy(name = name)
+    }
+
+    override fun onRenameFileAcceptClick() {
+        coroutineScope.launch {
+            documentFileName?.let { fileName ->
+                val result = filePicker.renameDocument(fileName.uri, fileName.name)
+
+                if (result) {
+                    loadDocuments(documentFiles.map { it.uri }.filter { it != fileName.uri })
+                    componentToast.show(R.string.file_picker_file_renamed)
+                    logger.log("File renamed")
+                } else {
+                    componentToast.show(R.string.file_picker_file_rename_error)
+                    logger.log("File rename failed")
+                }
+            }
+        }
+        documentFileName = null
+
+    }
+
+    override fun onRenameFileCancelClick() {
+        documentFileName = null
+    }
+
+    private suspend fun loadDocument(uri: Uri) {
+        filePicker.openDocument(uri)?.let {
+            documentFiles = listOf(it.toViewData())
+            logger.log("File opened")
+        } ?: componentToast.show(R.string.file_picker_file_open_fail)
+    }
+
+    private suspend fun loadDocuments(uris: List<Uri>) {
+        documentFiles = filePicker.openDocuments(uris).map { it.toViewData() }
+        logger.log("Files opened")
     }
 }
