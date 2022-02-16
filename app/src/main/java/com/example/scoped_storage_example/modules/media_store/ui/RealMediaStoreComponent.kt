@@ -125,8 +125,6 @@ class RealMediaStoreComponent(
                 if (mediaStore.removeMediaFile(uri)) {
                     refresh()
                     componentToast.show(R.string.media_store_file_remove_completed)
-                } else {
-                    componentToast.show(R.string.media_store_file_remove_error)
                 }
             }
         }

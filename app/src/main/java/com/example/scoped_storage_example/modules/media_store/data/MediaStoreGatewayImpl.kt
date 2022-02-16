@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import androidx.core.app.ActivityCompat.startIntentSenderForResult
+import com.example.scoped_storage_example.core.utils.ActivityProvider
 import com.example.scoped_storage_example.core.utils.FileTypes
 import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.example.scoped_storage_example.modules.media_store.data.models.DetailedMediaFile
@@ -20,7 +22,10 @@ import java.io.IOException
 /**
  * Interaction with media files is performed through the content resolver
  */
-class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
+class MediaStoreGatewayImpl(
+    private val context: Context,
+    private val activityProvider: ActivityProvider
+) : MediaStoreGateway {
 
     /**
      * Load all media files according to the selected type
@@ -220,7 +225,8 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
     /**
      * Remove file from media storage
      * It will be removed from disk as well
-     * On Android 10 and above, removing files that other apps own is restricted
+     * On Android 10 and above, removing files that other apps own is restricted,
+     * you need to ask for permission to delete a file
      * @return operation result
      */
     override suspend fun removeMediaFile(uri: Uri): Boolean = withContext(Dispatchers.IO) {
@@ -228,7 +234,18 @@ class MediaStoreGatewayImpl(private val context: Context) : MediaStoreGateway {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
                 resolver.delete(uri, null, null)
-            } catch (e: RecoverableSecurityException) {
+            } catch (e: SecurityException) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val intentSender = (e as? RecoverableSecurityException)?.userAction?.actionIntent?.intentSender
+                    intentSender?.let {
+                        startIntentSenderForResult(
+                            activityProvider.getActivity(),
+                            it,
+                            MediaStoreGateway.WRITE_PERMISSION_REQUEST_ID,
+                            null, 0, 0, 0, null
+                        )
+                    }
+                }
                 return@withContext false
             }
         } else {

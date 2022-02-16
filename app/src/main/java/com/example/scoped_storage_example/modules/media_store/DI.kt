@@ -11,7 +11,7 @@ import org.koin.core.component.get
 import org.koin.dsl.module
 
 val mediaStoreModule = module {
-    single<MediaStoreGateway> { MediaStoreGatewayImpl(androidContext()) }
+    single<MediaStoreGateway> { MediaStoreGatewayImpl(androidContext(), get()) }
 }
 
 fun ComponentFactory.createMediaStoreComponent(

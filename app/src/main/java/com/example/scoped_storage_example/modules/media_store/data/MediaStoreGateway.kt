@@ -8,6 +8,10 @@ import com.example.scoped_storage_example.modules.media_store.data.models.MediaF
 
 interface MediaStoreGateway {
 
+    companion object {
+        const val WRITE_PERMISSION_REQUEST_ID = 3
+    }
+
     suspend fun loadMediaFiles(filter: TypeFilter = TypeFilter.All): List<MediaFile>
 
     suspend fun writeImage(fileName: String, bitmap: Bitmap)
