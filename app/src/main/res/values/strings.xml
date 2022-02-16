@@ -3,6 +3,7 @@
     <string name="space_mb">%dmb</string>
     <string name="ok">OK</string>
     <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
 
     <!-- AppStorage -->
     <string name="app_storage_title">App Storage</string>
@@ -19,12 +20,16 @@
 
     <!-- MediaStore -->
     <string name="media_store_title">Media Store</string>
+    <string name="media_store_permission_request_title">Please grant permissions</string>
     <string name="media_store_read_permission_request">To open media storage you have to grant read external storage permission</string>
-    <string name="media_store_take_photo_permission_request">To save photo you have to grant write external storage permission</string>
+    <string name="media_store_save_photo_permission_request">To save photo you have to grant write external storage permission</string>
     <string name="media_store_remove_file_permission_request">To remove file you have to grant write external storage permission</string>
+    <string name="media_store_permission_denied_title">Permissions not granted</string>
+    <string name="media_store_permission_denied">You can grant permissions manually through settings. Go to Settings > Apps > Scoped Storage Example</string>
     <string name="media_store_file">file</string>
     <string name="media_store_take_photo">Take photo</string>
-    <string name="media_store_take_photo_completed">Photo saved</string>
+    <string name="media_store_save_photo_completed">Photo saved</string>
+    <string name="media_store_save_photo_failed">Failed to save photo</string>
     <string name="media_store_file_remove">Remove</string>
     <string name="media_store_file_remove_completed">File removed</string>
     <string name="media_store_file_remove_error">On Android 10 and above, removing files that other apps own is restricted!</string>

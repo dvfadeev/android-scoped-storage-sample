@@ -77,4 +77,5 @@ dependencies {
     implementation 'io.coil-kt:coil-compose:1.4.0'
     implementation 'io.coil-kt:coil-video:1.4.0'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    implementation 'com.sagar:coroutinespermission:2.0.3'
 }
