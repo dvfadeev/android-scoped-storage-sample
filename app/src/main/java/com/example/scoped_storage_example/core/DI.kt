@@ -8,4 +8,5 @@ val coreModule = module {
     single<ComponentToast> { ComponentToastImpl(androidContext()) }
     single<Logger> { LoggerImpl(get()) }
     single<CurrentTime> { CurrentTimeImpl() }
+    single<PermissionChecker> { PermissionCheckerImpl(get()) }
 }

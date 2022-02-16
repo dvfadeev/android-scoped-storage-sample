@@ -1,6 +1,5 @@
 package com.example.scoped_storage_example.modules.media_store.ui
 
-import android.app.Activity
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -73,41 +72,63 @@ private fun MediaStorePermissionScreen(
     }
     val request = component.permissionRequest
 
-    PermissionChecker(
-        permission = request.permission,
-        message = stringResource(id = request.messageResource),
-        onCancelClick = {
-            if (request == PermissionRequest.ReadStorage) {
-                (context as Activity).onBackPressed()
-            } else {
-                component.onRequestPermission(PermissionRequest.ReadStorage)
-            }
-        }) {
+//    PermissionChecker(
+//        permission = request.permission,
+//        message = stringResource(id = request.messageResource),
+//        onCancelClick = {
+//            if (request == PermissionRequest.ReadStorage) {
+//                (context as Activity).onBackPressed()
+//            } else {
+//                component.onRequestPermission(PermissionRequest.ReadStorage)
+//            }
+//        }) {
+//
+//        when (request) {
+//            PermissionRequest.ReadStorage -> {
+//                MediaStoreContent(
+//                    cameraLauncher = cameraLauncher,
+//                    component = component,
+//                    modifier = modifier
+//                )
+//            }
+//
+//            PermissionRequest.TakePhoto -> {
+//                LaunchedEffect(key1 = Unit) {
+//                    cameraLauncher.launch()
+//                    component.onRequestPermission(PermissionRequest.ReadStorage)
+//                }
+//            }
+//
+//            PermissionRequest.RemoveFile -> {
+//                component.selectedUri?.let {
+//                    component.onFileRemoveClick(it)
+//                    component.onRequestPermission(PermissionRequest.ReadStorage)
+//                }
+//            }
+//        }
+//    }
 
-        when (request) {
-            PermissionRequest.ReadStorage -> {
-                MediaStoreContent(
-                    cameraLauncher = cameraLauncher,
-                    component = component,
-                    modifier = modifier
-                )
-            }
+    Box(modifier = modifier) {
+        MediaStoreContent(
+            cameraLauncher = cameraLauncher,
+            component = component,
+            modifier = modifier
+        )
 
-            PermissionRequest.TakePhoto -> {
-                LaunchedEffect(key1 = Unit) {
-                    cameraLauncher.launch()
-                    component.onRequestPermission(PermissionRequest.ReadStorage)
-                }
-            }
-
-            PermissionRequest.RemoveFile -> {
-                component.selectedUri?.let {
-                    component.onFileRemoveClick(it)
-                    component.onRequestPermission(PermissionRequest.ReadStorage)
-                }
-            }
+        if(component.dialogData != null) {
+            Dialog(data = component.dialogData!!)
         }
     }
+
+//    if(component.permissionDialogData != null) {
+//        PermissionDialog(data = component.permissionDialogData!!)
+//    } else {
+//        MediaStoreContent(
+//            cameraLauncher = cameraLauncher,
+//            component = component,
+//            modifier = modifier
+//        )
+//    }
 }
 
 
@@ -117,9 +138,10 @@ private fun MediaStoreContent(
     component: MediaStoreComponent,
     modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(key1 = Unit) {
-        component.onLoadMedia()
-    }
+
+//    LaunchedEffect(key1 = Unit) {
+//        component.onLoadMedia()
+//    }
 
     val scrollState = rememberLazyListState()
 
@@ -446,6 +468,8 @@ private fun MediaStoreUiPreview() {
 }
 
 class FakeMediaStoreComponent : MediaStoreComponent {
+
+    override val dialogData: DialogData? = null
 
     override var filter: TypeFilter = TypeFilter.All
 
