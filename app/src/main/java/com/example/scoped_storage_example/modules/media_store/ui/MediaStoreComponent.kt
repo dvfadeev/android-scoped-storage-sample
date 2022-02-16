@@ -13,8 +13,6 @@ interface MediaStoreComponent {
 
     val mediaFiles: List<MediaFileViewData>?
 
-    val permissionRequest: PermissionRequest
-
     val selectedUri: Uri?
 
     val selectedMediaFile: DetailedImageFileViewData?
@@ -22,8 +20,6 @@ interface MediaStoreComponent {
     val isShowImageFileContent: Boolean
 
     fun onLoadMedia()
-
-    fun onRequestPermission(permissionRequest: PermissionRequest)
 
     fun onSaveBitmap(bitmap: Bitmap)
 

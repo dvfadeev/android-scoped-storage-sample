@@ -6,12 +6,14 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import com.example.scoped_storage_example.R
 
 class DialogData(
@@ -21,15 +23,20 @@ class DialogData(
     val onCancelClick: (() -> Unit)? = null
 )
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Dialog(
     data: DialogData
 ) {
     AlertDialog(
         onDismissRequest = data.onCancelClick ?: data.onAcceptClick ?: { },
+        properties = DialogProperties(usePlatformDefaultWidth = false),
         title = null,
+        modifier = Modifier.padding(horizontal = 32.dp),
         text = {
-            Column {
+            Column(
+                modifier = Modifier.wrapContentWidth()
+            ) {
                 Text(
                     text = stringResource(id = data.titleRes),
                     color = MaterialTheme.colors.onBackground,
@@ -38,7 +45,7 @@ fun Dialog(
                         fontSize = 18.sp,
                         letterSpacing = 0.15.sp
                     ),
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
 
                 data.messageRes?.let { messageRes ->
@@ -60,7 +67,7 @@ fun Dialog(
                     TextButton(
                         onClick = onClick
                     ) {
-                        Text(text = stringResource(id = R.string.file_picker_file_rename_cancel))
+                        Text(text = stringResource(id = R.string.cancel))
                     }
                 }
 
@@ -68,7 +75,7 @@ fun Dialog(
                     TextButton(
                         onClick = onClick
                     ) {
-                        Text(text = stringResource(id = R.string.file_picker_file_rename_accept))
+                        Text(text = stringResource(id = R.string.ok))
                     }
                 }
             }
