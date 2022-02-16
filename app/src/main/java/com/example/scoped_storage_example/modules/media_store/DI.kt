@@ -11,11 +11,12 @@ import org.koin.core.component.get
 import org.koin.dsl.module
 
 val mediaStoreModule = module {
-    single<MediaStoreGateway> { MediaStoreGatewayImpl(androidContext()) }
+    single<MediaStoreGateway> { MediaStoreGatewayImpl(androidContext(), get()) }
 }
 
 fun ComponentFactory.createMediaStoreComponent(
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
+    onOutput: (MediaStoreComponent.Output) -> Unit,
 ): MediaStoreComponent {
-    return RealMediaStoreComponent(componentContext, get(), get(), get(), get())
+    return RealMediaStoreComponent(componentContext, onOutput, get(), get(), get(), get(), get())
 }

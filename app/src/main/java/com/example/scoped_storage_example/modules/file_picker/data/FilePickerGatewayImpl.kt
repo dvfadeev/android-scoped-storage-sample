@@ -6,6 +6,7 @@ import android.provider.DocumentsContract
 import com.example.scoped_storage_example.modules.file_picker.data.models.DocumentFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.FileNotFoundException
 
 /**
  * File picker only returns document uri,
@@ -13,12 +14,13 @@ import kotlinx.coroutines.withContext
  */
 class FilePickerGatewayImpl(private val context: Context) : FilePickerGateway {
 
+    private val resolver = context.contentResolver
+
     /**
      * Open document file by uri
      * @return DocumentFile
      */
     override suspend fun openDocument(uri: Uri): DocumentFile? = withContext(Dispatchers.IO) {
-        val resolver = context.contentResolver
         var resultImage: DocumentFile? = null
 
         val projection = arrayOf( // Document columns
@@ -62,7 +64,6 @@ class FilePickerGatewayImpl(private val context: Context) : FilePickerGateway {
                 summary = summary
             )
         }
-
         return@withContext resultImage
     }
 
@@ -74,7 +75,63 @@ class FilePickerGatewayImpl(private val context: Context) : FilePickerGateway {
                 result.add(file)
             }
         }
-
         return result
+    }
+
+    /**
+     * Rename document file by uri
+     * @return operation result
+     */
+    override suspend fun renameDocument(uri: Uri, documentName: String): Boolean = withContext(Dispatchers.IO) {
+        val isSupportsRename = validateDocumentFlag(uri, DocumentsContract.Document.FLAG_SUPPORTS_RENAME)
+
+        if (isSupportsRename) {
+            try {
+                DocumentsContract.renameDocument(resolver, uri, documentName)
+                return@withContext true
+            } catch (e: FileNotFoundException) {
+                // We can get FileNotFoundException while getting a new uri,
+                // in this case if the old file no longer available then it was renamed successfully
+                val file = androidx.documentfile.provider.DocumentFile.fromSingleUri(context, uri)
+                return@withContext file?.exists() == false
+            }
+        } else {
+            return@withContext false
+        }
+    }
+
+    /**
+     * Remove document file by uri
+     * @return operation result
+     */
+    override suspend fun removeDocument(uri: Uri): Boolean = withContext(Dispatchers.IO) {
+        val isSupportsDelete = validateDocumentFlag(uri, DocumentsContract.Document.FLAG_SUPPORTS_DELETE)
+
+        if (isSupportsDelete) {
+            try {
+                DocumentsContract.deleteDocument(resolver, uri)
+                return@withContext true
+            } catch (e: FileNotFoundException) {
+                return@withContext false
+            }
+        } else {
+            return@withContext false
+        }
+    }
+
+    private fun validateDocumentFlag(uri: Uri, flag: Int): Boolean {
+        val resolver = context.contentResolver
+        resolver.query(
+            uri,
+            arrayOf(DocumentsContract.Document.COLUMN_FLAGS),
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            cursor.moveToFirst()
+            val flags = cursor.getInt(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_FLAGS))
+            return flags and flag == flag
+        }
+        return false
     }
 }
