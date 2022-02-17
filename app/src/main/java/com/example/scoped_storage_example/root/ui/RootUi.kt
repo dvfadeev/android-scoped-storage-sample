@@ -7,7 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arkivanov.decompose.Child
+import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetpack.Children
+import com.arkivanov.decompose.extensions.compose.jetpack.animation.child.slide
 import com.arkivanov.decompose.router.RouterState
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
 import com.example.scoped_storage_example.modules.app_storage.ui.AppStorageUi
@@ -16,6 +18,7 @@ import com.example.scoped_storage_example.modules.media_store.ui.MediaStoreUi
 import com.example.scoped_storage_example.navigation.ui.FakeNavigationComponent
 import com.example.scoped_storage_example.navigation.ui.NavigationUi
 
+@OptIn(ExperimentalDecomposeApi::class)
 @Composable
 fun RootUi(
     component: RootComponent,
@@ -27,7 +30,7 @@ fun RootUi(
             modifier = modifier
                 .fillMaxSize()
         ) {
-            Children(component.routerState) { child ->
+            Children(component.routerState, animation = slide()) { child ->
                 when (val instance = child.instance) {
                     is RootComponent.Child.Navigation -> NavigationUi(component = instance.component)
                     is RootComponent.Child.AppStorage -> AppStorageUi(component = instance.component)

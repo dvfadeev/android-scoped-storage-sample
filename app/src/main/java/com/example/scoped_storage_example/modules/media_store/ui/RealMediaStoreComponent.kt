@@ -17,7 +17,9 @@ import com.example.scoped_storage_example.core.ui.widgets.DialogData
 import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
 import com.example.scoped_storage_example.modules.media_store.data.MediaStoreGateway
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RealMediaStoreComponent(
     componentContext: ComponentContext,
@@ -146,7 +148,9 @@ class RealMediaStoreComponent(
     }
 
     private suspend fun refresh() {
-        mediaFiles = mediaStore.loadMediaFiles(filter).map { it.toViewData() }
+        withContext(Dispatchers.IO) {
+            mediaFiles = mediaStore.loadMediaFiles(filter).map { it.toViewData() }
+        }
     }
 
     private fun onBackPressed(): Boolean {
