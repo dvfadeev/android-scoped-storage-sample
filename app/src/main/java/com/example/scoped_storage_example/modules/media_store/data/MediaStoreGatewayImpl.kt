@@ -4,6 +4,7 @@ import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
+import android.content.IntentSender
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -235,15 +236,41 @@ class MediaStoreGatewayImpl(
             try {
                 resolver.delete(uri, null, null)
             } catch (e: SecurityException) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val intentSender = (e as? RecoverableSecurityException)?.userAction?.actionIntent?.intentSender
-                    intentSender?.let {
-                        startIntentSenderForResult(
-                            activityProvider.getActivity(),
-                            it,
-                            MediaStoreGateway.WRITE_PERMISSION_REQUEST_ID,
-                            null, 0, 0, 0, null
-                        )
+
+                when {
+                    // API 30 creteWriteRequest from MediaStore
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                        val uris = if (MediaStoreGateway.API_30_MULTIPLY_WRITE_PERMISSIONS_ENABLED) {
+                            loadMediaFiles().map { it.uri }
+                        } else {
+                            listOf(uri)
+                        }
+                        val request = MediaStore.createWriteRequest(resolver, uris)
+                        try {
+                            startIntentSenderForResult(
+                                activityProvider.getActivity(),
+                                request.intentSender,
+                                MediaStoreGateway.WRITE_PERMISSION_REQUEST_ID,
+                                null, 0, 0, 0, null
+                            )
+                        } catch (e: IntentSender.SendIntentException) {
+                        }
+                    }
+
+                    // API 29 createWriteRequest from RecoverableSecurityException
+                    Build.VERSION.SDK_INT == Build.VERSION_CODES.Q -> {
+                        val intentSender = (e as? RecoverableSecurityException)?.userAction?.actionIntent?.intentSender
+                        intentSender?.let {
+                            try {
+                                startIntentSenderForResult(
+                                    activityProvider.getActivity(),
+                                    it,
+                                    MediaStoreGateway.WRITE_PERMISSION_REQUEST_ID,
+                                    null, 0, 0, 0, null
+                                )
+                            } catch (e: IntentSender.SendIntentException) {
+                            }
+                        }
                     }
                 }
                 return@withContext false

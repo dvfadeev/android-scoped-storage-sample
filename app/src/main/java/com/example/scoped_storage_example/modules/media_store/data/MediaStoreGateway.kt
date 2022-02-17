@@ -9,6 +9,7 @@ import com.example.scoped_storage_example.modules.media_store.data.models.MediaF
 interface MediaStoreGateway {
 
     companion object {
+        const val API_30_MULTIPLY_WRITE_PERMISSIONS_ENABLED = true
         const val WRITE_PERMISSION_REQUEST_ID = 3
     }
 
