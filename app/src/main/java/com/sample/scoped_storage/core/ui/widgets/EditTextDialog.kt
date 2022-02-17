@@ -5,5 +5,5 @@ class EditTextDialogData(
     val onTextChanged: (String) -> Unit,
     titleRes: Int,
     onAcceptClick: (() -> Unit)? = null,
-    onCancelClick: (() -> Unit)? = null,
+    onCancelClick: (() -> Unit)? = null
 ) : DialogData(titleRes, null, onAcceptClick, onCancelClick)

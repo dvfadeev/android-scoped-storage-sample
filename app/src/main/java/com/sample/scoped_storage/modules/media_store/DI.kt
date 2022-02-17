@@ -16,7 +16,7 @@ val mediaStoreModule = module {
 
 fun ComponentFactory.createMediaStoreComponent(
     componentContext: ComponentContext,
-    onOutput: (MediaStoreComponent.Output) -> Unit,
+    onOutput: (MediaStoreComponent.Output) -> Unit
 ): MediaStoreComponent {
     return RealMediaStoreComponent(componentContext, onOutput, get(), get(), get(), get(), get())
 }

@@ -2,7 +2,6 @@
     <string name="app_name">Scoped Storage Sample</string>
     <string name="space_mb">%dmb</string>
     <string name="ok">OK</string>
-    <string name="close">Close</string>
     <string name="cancel">Cancel</string>
 
     <!-- AppStorage -->
@@ -50,7 +49,6 @@
     <string name="file_picker_launch">Open</string>
     <string name="file_picker_launch_text">Press button to open native file picker</string>
     <string name="file_picker_launch_multiply_text">Press button to open native multiply files picker (hold to select file)</string>
-    <string name="file_picker_filter_text">You can change the type of selected files</string>
     <string name="file_picker_file_open_fail">Failed to open document file</string>
     <string name="file_picker_previous">Previous</string>
     <string name="file_picker_next">Next</string>
@@ -63,11 +61,8 @@
     <string name="file_picker_file_icon">Icon:</string>
     <string name="file_picker_file_summary">Summary:</string>
     <string name="file_picker_file_rename_title">Enter a new file name</string>
-    <string name="file_picker_file_rename_accept">Accept</string>
-    <string name="file_picker_file_rename_cancel">Cancel</string>
     <string name="file_picker_file_renamed">File renamed successfully</string>
     <string name="file_picker_file_rename_error">Rename permission denied. Please try to select file from storage directory</string>
-    <string name="file_picker_file_remove">Remove</string>
     <string name="file_picker_file_remove_title">Delete file</string>
     <string name="file_picker_file_remove_message">Are you sure you want to delete this file?</string>
     <string name="file_picker_file_removed">File removed successfully</string>

@@ -26,7 +26,7 @@ fun ImageViewer(
     type: String,
     size: Dp,
     modifier: Modifier = Modifier,
-    isCropEnabled: Boolean = true,
+    isCropEnabled: Boolean = true
 ) {
     if (type.startsWith(FileTypes.MIME_TYPE_IMAGE_ALL) || type.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
         val context = LocalContext.current
