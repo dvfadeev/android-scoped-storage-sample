@@ -13,7 +13,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +35,8 @@ import com.example.scoped_storage_example.core.ui.theme.additionalColors
 import com.example.scoped_storage_example.core.ui.widgets.*
 import com.example.scoped_storage_example.core.utils.AvailableFilters
 import com.example.scoped_storage_example.core.utils.TypeFilter
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @Composable
 fun MediaStoreUi(
@@ -66,9 +70,11 @@ private fun MediaStoreContent(
         SlideAnimationScreen(
             firstScreen = {
                 MediaStoreListContent(
+                    isRefreshing = component.isRefreshing,
                     filter = component.filter,
                     mediaFiles = component.mediaFiles,
                     onChangeMediaType = component::onChangeFilter,
+                    onLoadMedia = component::onLoadMedia,
                     onSaveBitmap = component::onSaveBitmap,
                     onFileClick = component::onFileClick,
                     onFileLongClick = component::onFileLongClick,
@@ -95,11 +101,14 @@ private fun MediaStoreContent(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MediaStoreListContent(
+    isRefreshing: Boolean,
     filter: TypeFilter,
     mediaFiles: List<MediaFileViewData>?,
     onChangeMediaType: (TypeFilter) -> Unit,
+    onLoadMedia: () -> Unit,
     onSaveBitmap: (Bitmap) -> Unit,
     onFileClick: (Uri) -> Unit,
     onFileLongClick: (Uri) -> Unit,
@@ -113,34 +122,46 @@ private fun MediaStoreListContent(
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(top = 20.dp)
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing),
+        onRefresh = onLoadMedia,
     ) {
-        ControlButton(
-            text = stringResource(id = R.string.media_store_take_photo),
-            onClick = { cameraLauncher.launch() },
-            modifier = Modifier.align(CenterHorizontally)
-        )
+        LazyColumn(
+            contentPadding = PaddingValues(top = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = CenterHorizontally,
+            modifier = modifier
+                .fillMaxWidth()
+                .verticalScrollbar(scrollState, 4.dp, color = MaterialTheme.colors.primary),
+            state = scrollState
+        ) {
+            item {
+                ControlButton(
+                    text = stringResource(id = R.string.media_store_take_photo),
+                    onClick = { cameraLauncher.launch() }
+                )
+            }
 
-        MediaTypeSelector(
-            filter = filter,
-            onChangeFilter = {
-                onChangeMediaType(it)
-            },
-            modifier = Modifier.align(CenterHorizontally)
-        )
+            stickyHeader {
+                Surface(
+                    color = MaterialTheme.colors.background,
+                    modifier = modifier
+                        .fillMaxSize()
+                ) {
+                    Box {
+                        MediaTypeSelector(
+                            filter = filter,
+                            onChangeFilter = {
+                                onChangeMediaType(it)
+                            },
+                            modifier = Modifier.align(Center)
+                        )
+                    }
+                }
+            }
 
-        mediaFiles?.let {
-            LazyColumn(
-                contentPadding = PaddingValues(top = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .verticalScrollbar(scrollState, 4.dp, color = MaterialTheme.colors.primary),
-                state = scrollState
-            ) {
-                items(mediaFiles) {
+            mediaFiles?.let { files ->
+                items(files) {
                     MediaFileItem(
                         data = it,
                         onFileClick = onFileClick,
@@ -150,10 +171,6 @@ private fun MediaStoreListContent(
                         }
                     )
                 }
-            }
-        } ?: run {
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(modifier = Modifier.align(Center))
             }
         }
     }
@@ -167,12 +184,12 @@ private fun FileContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(top = 20.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Card(
             backgroundColor = MaterialTheme.colors.primary,
             elevation = 7.dp,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp)
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -203,6 +220,12 @@ private fun FileContent(
             }
         }
 
+        Text(
+            text = "Content preview",
+            modifier = Modifier
+                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+        )
+
         val conf = LocalConfiguration.current
         val size = conf.screenWidthDp.dp - 64.dp
 
@@ -210,6 +233,7 @@ private fun FileContent(
             uri = file.uri,
             size = size,
             type = file.mimeType,
+            isCropEnabled = false,
             modifier = Modifier
                 .padding(horizontal = 32.dp, vertical = 8.dp)
                 .align(CenterHorizontally)
@@ -347,14 +371,16 @@ fun FileField(
             text = title,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.weight(1f)
+            style = MaterialTheme.typography.caption
         )
         Text(
             text = text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.caption
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .weight(1f)
         )
     }
 }
@@ -386,11 +412,11 @@ class FakeMediaStoreComponent : MediaStoreComponent {
 
     override val dialogData: DialogData? = null
 
+    override val isRefreshing: Boolean = false
+
     override var filter: TypeFilter = TypeFilter.All
 
-    override var mediaFiles: List<MediaFileViewData>? = List(5) {
-        MediaFileViewData.MOCK
-    }
+    override var mediaFiles: List<MediaFileViewData>? = List(5) { MediaFileViewData.MOCK }
 
     override val selectedUri: Uri? = null
 

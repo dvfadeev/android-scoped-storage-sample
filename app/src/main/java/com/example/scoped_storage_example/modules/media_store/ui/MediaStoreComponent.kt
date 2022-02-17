@@ -9,6 +9,8 @@ interface MediaStoreComponent {
 
     val dialogData: DialogData?
 
+    val isRefreshing: Boolean
+
     val filter: TypeFilter
 
     val mediaFiles: List<MediaFileViewData>?

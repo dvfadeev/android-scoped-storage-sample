@@ -2,8 +2,10 @@ package com.example.scoped_storage_example.core.ui.widgets
 
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.decode.VideoFrameDecoder
 import com.example.scoped_storage_example.R
+import com.example.scoped_storage_example.core.ui.theme.additionalColors
 import com.example.scoped_storage_example.core.utils.FileTypes
 
 @Composable
@@ -37,7 +40,8 @@ fun ImageViewer(
         Image(
             modifier = modifier
                 .then(sizeModifier)
-                .clip(RoundedCornerShape(8.dp)),
+                .clip(RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.additionalColors.lightText, RoundedCornerShape(8.dp)),
             painter = rememberImagePainter(
                 uri,
                 builder = {
