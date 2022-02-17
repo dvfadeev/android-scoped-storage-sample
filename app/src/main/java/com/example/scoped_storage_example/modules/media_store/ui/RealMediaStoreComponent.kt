@@ -35,6 +35,8 @@ class RealMediaStoreComponent(
 
     override var dialogData: DialogData? by mutableStateOf(null)
 
+    override var isRefreshing: Boolean by mutableStateOf(false)
+
     override var filter: TypeFilter by mutableStateOf(TypeFilter.All)
 
     override var mediaFiles: List<MediaFileViewData>? by mutableStateOf(null)
@@ -53,6 +55,7 @@ class RealMediaStoreComponent(
     }
 
     override fun onLoadMedia() {
+        isRefreshing = true
         permissionValidator.validatePermission(
             permission = Manifest.permission.READ_EXTERNAL_STORAGE,
             messageRes = R.string.media_store_read_permission_request,
@@ -63,6 +66,7 @@ class RealMediaStoreComponent(
                 coroutineScope.launch {
                     refresh()
                     logger.log("Media loaded")
+                    isRefreshing = false
                 }
             },
             onDenied = {

@@ -2,8 +2,10 @@ package com.example.scoped_storage_example.core.ui.widgets
 
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,26 +17,36 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.decode.VideoFrameDecoder
 import com.example.scoped_storage_example.R
+import com.example.scoped_storage_example.core.ui.theme.additionalColors
 import com.example.scoped_storage_example.core.utils.FileTypes
 
 @Composable
 fun ImageViewer(
     uri: Uri?,
-    size: Dp,
     type: String,
-    modifier: Modifier = Modifier
+    size: Dp,
+    modifier: Modifier = Modifier,
+    isCropEnabled: Boolean = true,
 ) {
     if (type.startsWith(FileTypes.MIME_TYPE_IMAGE_ALL) || type.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
         val context = LocalContext.current
 
+        val sizeModifier = if (isCropEnabled) {
+            Modifier.size(size)
+        } else {
+            Modifier
+        }
+
         Image(
             modifier = modifier
-                .size(size)
-                .clip(RoundedCornerShape(8.dp)),
+                .then(sizeModifier)
+                .clip(RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.additionalColors.lightText, RoundedCornerShape(8.dp)),
             painter = rememberImagePainter(
                 uri,
                 builder = {
                     with(LocalDensity.current) { size(size.roundToPx()) }
+
                     placeholder(R.color.cardview_dark_background)
                     if (type.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
                         decoder(VideoFrameDecoder(context))
@@ -42,7 +54,9 @@ fun ImageViewer(
                     }
                 }
             ),
-            contentScale = ContentScale.Fit,
+            contentScale = if (isCropEnabled) {
+                ContentScale.Crop
+            } else ContentScale.Fit,
             contentDescription = null
         )
     }

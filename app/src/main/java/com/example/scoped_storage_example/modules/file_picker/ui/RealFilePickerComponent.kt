@@ -8,6 +8,8 @@ import com.arkivanov.decompose.ComponentContext
 import com.example.scoped_storage_example.R
 import com.example.scoped_storage_example.core.data.ComponentToast
 import com.example.scoped_storage_example.core.data.Logger
+import com.example.scoped_storage_example.core.ui.widgets.DialogData
+import com.example.scoped_storage_example.core.ui.widgets.EditTextDialogData
 import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.example.scoped_storage_example.core.utils.componentCoroutineScope
 import com.example.scoped_storage_example.modules.file_picker.data.FilePickerGateway
@@ -22,11 +24,11 @@ class RealFilePickerComponent(
 
     private val coroutineScope = componentCoroutineScope()
 
+    override var dialogData: DialogData? by mutableStateOf(null)
+
     override var filter: TypeFilter by mutableStateOf(TypeFilter.All)
 
     override var documentFiles: List<DocumentFileViewData> by mutableStateOf(listOf())
-
-    override var documentFileName: DocumentFileNameViewData? by mutableStateOf(null)
 
     init {
         logger.log("Init FilePicker")
@@ -48,52 +50,60 @@ class RealFilePickerComponent(
         }
     }
 
-    override fun onRemoveFileClick(uri: Uri) {
-        coroutineScope.launch {
-            val result = filePicker.removeDocument(uri)
-
-            if (result) {
-                componentToast.show(R.string.file_picker_file_removed)
-                loadDocuments(documentFiles.map { it.uri }.filter { it != uri })
-                logger.log("File removed")
-            } else {
-                componentToast.show(R.string.file_picker_file_remove_error)
-                logger.log("File remove failed")
-            }
-        }
-    }
-
     override fun onOpenRenameDialogClick(uri: Uri) {
-        documentFiles.find { it.uri == uri }?.let {
-            documentFileName = DocumentFileNameViewData(uri = uri, name = it.name)
-        }
-    }
+        var fileName = documentFiles.find { it.uri == uri }?.name ?: ""
 
-    override fun onFileNameTextChanged(name: String) {
-        documentFileName = documentFileName?.copy(name = name)
-    }
+        dialogData = EditTextDialogData(
+            initText = fileName,
+            onTextChanged = {
+                fileName = it
+            },
+            titleRes = R.string.file_picker_file_rename_title,
+            onAcceptClick = {
+                coroutineScope.launch {
+                    val result = filePicker.renameDocument(uri, fileName)
 
-    override fun onRenameFileAcceptClick() {
-        coroutineScope.launch {
-            documentFileName?.let { fileName ->
-                val result = filePicker.renameDocument(fileName.uri, fileName.name)
+                    if (result) {
+                        loadDocuments(documentFiles.map { it.uri }.filter { it != uri })
+                        componentToast.show(R.string.file_picker_file_renamed)
+                        logger.log("File renamed")
+                    } else {
+                        componentToast.show(R.string.file_picker_file_rename_error)
+                        logger.log("File rename failed")
+                    }
 
-                if (result) {
-                    loadDocuments(documentFiles.map { it.uri }.filter { it != fileName.uri })
-                    componentToast.show(R.string.file_picker_file_renamed)
-                    logger.log("File renamed")
-                } else {
-                    componentToast.show(R.string.file_picker_file_rename_error)
-                    logger.log("File rename failed")
                 }
+                dialogData = null
+            },
+            onCancelClick = {
+                dialogData = null
             }
-        }
-        documentFileName = null
-
+        )
     }
 
-    override fun onRenameFileCancelClick() {
-        documentFileName = null
+    override fun onOpenRemoveDialogClick(uri: Uri) {
+        dialogData = DialogData(
+            titleRes = R.string.file_picker_file_remove_title,
+            messageRes = R.string.file_picker_file_remove_message,
+            onAcceptClick = {
+                coroutineScope.launch {
+                    val result = filePicker.removeDocument(uri)
+
+                    if (result) {
+                        componentToast.show(R.string.file_picker_file_removed)
+                        loadDocuments(documentFiles.map { it.uri }.filter { it != uri })
+                        logger.log("File removed")
+                    } else {
+                        componentToast.show(R.string.file_picker_file_remove_error)
+                        logger.log("File remove failed")
+                    }
+                }
+                dialogData = null
+            },
+            onCancelClick = {
+                dialogData = null
+            }
+        )
     }
 
     private suspend fun loadDocument(uri: Uri) {
