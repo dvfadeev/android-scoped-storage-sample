@@ -15,14 +15,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.scoped_storage_example.R
 import com.example.scoped_storage_example.core.ui.theme.AppTheme
-import com.example.scoped_storage_example.core.ui.widgets.ControlButton
-import com.example.scoped_storage_example.core.ui.widgets.ImageViewer
-import com.example.scoped_storage_example.core.ui.widgets.SelectableButton
-import com.example.scoped_storage_example.core.ui.widgets.Toolbar
+import com.example.scoped_storage_example.core.ui.widgets.*
 import com.example.scoped_storage_example.core.utils.AvailableFilters
 import com.example.scoped_storage_example.core.utils.TypeFilter
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -46,17 +44,14 @@ fun FilePickerUi(
         content = {
             FilePickerContent(
                 modifier = Modifier.padding(it),
+                dialogData = component.dialogData,
                 filter = component.filter,
                 documentFiles = component.documentFiles,
-                documentFileName = component.documentFileName,
                 onChangeFilter = component::onChangeFilter,
                 onOpenFileClick = component::onOpenFileClick,
                 onOpenFilesClick = component::onOpenFilesClick,
                 onOpenRenameDialogClick = component::onOpenRenameDialogClick,
-                onFileNameTextChanged = component::onFileNameTextChanged,
-                onRenameFileAcceptClick = component::onRenameFileAcceptClick,
-                onRenameFileCancelClick = component::onRenameFileCancelClick,
-                onRemoveFileClick = component::onRemoveFileClick
+                onOpenRemoveDialogClick = component::onOpenRemoveDialogClick
             )
         }
     )
@@ -66,17 +61,14 @@ fun FilePickerUi(
 @Composable
 private fun FilePickerContent(
     modifier: Modifier = Modifier,
+    dialogData: DialogData?,
     filter: TypeFilter,
     documentFiles: List<DocumentFileViewData>,
-    documentFileName: DocumentFileNameViewData?,
     onChangeFilter: (TypeFilter) -> Unit,
     onOpenFileClick: (Uri) -> Unit,
     onOpenFilesClick: (List<Uri>) -> Unit,
     onOpenRenameDialogClick: (Uri) -> Unit,
-    onFileNameTextChanged: (String) -> Unit,
-    onRenameFileAcceptClick: () -> Unit,
-    onRenameFileCancelClick: () -> Unit,
-    onRemoveFileClick: (Uri) -> Unit
+    onOpenRemoveDialogClick: (Uri) -> Unit
 ) {
     val pickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let {
@@ -149,12 +141,12 @@ private fun FilePickerContent(
                     isNextEnabled = size > 1 && page < size - 1,
                     onPreviousClick = {
                         scope.launch {
-                            pagerState.scrollToPage(page - 1)
+                            pagerState.animateScrollToPage(page - 1)
                         }
                     },
                     onNextClick = {
                         scope.launch {
-                            pagerState.scrollToPage(page + 1)
+                            pagerState.animateScrollToPage(page + 1)
                         }
                     },
                     modifier = Modifier
@@ -162,27 +154,23 @@ private fun FilePickerContent(
                 )
 
                 HorizontalPager(
-                    state = pagerState
+                    state = pagerState,
+                    verticalAlignment = Alignment.Top
                 ) {
                     if (size > it) {
                         val file = documentFiles[it]
                         DocumentFileItem(
                             data = file,
                             onOpenRenameDialogClick = { onOpenRenameDialogClick(file.uri) },
-                            onRemoveFileClick = { onRemoveFileClick(file.uri) }
+                            onRemoveFileClick = { onOpenRemoveDialogClick(file.uri) }
                         )
                     }
                 }
             }
         }
 
-        if (documentFileName != null) {
-            RenameFileDialog(
-                documentFileName = documentFileName,
-                onTextChanged = onFileNameTextChanged,
-                onAcceptClick = onRenameFileAcceptClick,
-                onCancelClick = onRenameFileCancelClick
-            )
+        if (dialogData != null) {
+            Dialog(dialogData)
         }
     }
 }
@@ -277,7 +265,6 @@ private fun DocumentFileItem(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(16.dp)
         ) {
-
             DocumentFileField(
                 title = stringResource(id = R.string.file_picker_file_name),
                 text = data.name,
@@ -286,7 +273,7 @@ private fun DocumentFileItem(
                         onClick = onOpenRenameDialogClick,
                         modifier = Modifier
                             .padding(start = 12.dp)
-                            .size(16.dp)
+                            .size(20.dp)
                     ) {
                         Icon(
                             painter = painterResource(android.R.drawable.ic_menu_edit),
@@ -312,70 +299,30 @@ private fun DocumentFileItem(
                 DocumentFileField(title = stringResource(id = R.string.file_picker_file_summary), text = it)
             }
 
-            ControlButton(
-                text = stringResource(id = R.string.file_picker_file_remove),
+            IconButton(
                 onClick = onRemoveFileClick,
-                modifier = Modifier.align(Alignment.End)
-            )
-
-            val conf = LocalConfiguration.current
-            val size = conf.screenWidthDp.dp - 96.dp
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .size(24.dp)
+            ) {
+                Icon(
+                    painter = painterResource(android.R.drawable.ic_menu_delete),
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.primary
+                )
+            }
 
             ImageViewer(
                 uri = data.uri,
-                size = size,
+                size = LocalConfiguration.current.screenWidthDp.dp,
+                isCropEnabled = false,
                 type = data.mimeType,
                 modifier = Modifier
-                    .padding(horizontal = 32.dp, vertical = 8.dp)
+                    .padding(vertical = 8.dp)
                     .align(Alignment.CenterHorizontally)
             )
         }
     }
-}
-
-@Composable
-private fun RenameFileDialog(
-    documentFileName: DocumentFileNameViewData,
-    onAcceptClick: () -> Unit,
-    onCancelClick: () -> Unit,
-    onTextChanged: (String) -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onCancelClick,
-        title = null,
-        text = {
-            Column {
-                Text(
-                    text = stringResource(id = R.string.file_picker_file_rename_title),
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                OutlinedTextField(
-                    value = documentFileName.name,
-                    onValueChange = onTextChanged
-                )
-            }
-        },
-        buttons = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                SelectableButton(
-                    text = stringResource(id = R.string.file_picker_file_rename_cancel),
-                    isSelected = false,
-                    onClick = onCancelClick,
-                    modifier = Modifier.weight(1f)
-                )
-                SelectableButton(
-                    text = stringResource(id = R.string.file_picker_file_rename_accept),
-                    isSelected = true,
-                    onClick = onAcceptClick,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    )
 }
 
 @Composable
@@ -399,18 +346,25 @@ private fun DocumentFileField(
     icon: @Composable (() -> Unit)? = null
 ) {
     Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.caption,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.caption
+            maxLines = 1
         )
 
+        Text(
+            text = text,
+            style = MaterialTheme.typography.caption,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .weight(1f)
+        )
         icon?.invoke()
     }
 }
@@ -425,11 +379,11 @@ private fun FilePickerPreview() {
 
 class FakeFilePickerComponent : FilePickerComponent {
 
+    override val dialogData: DialogData? = null
+
     override var filter: TypeFilter = TypeFilter.All
 
     override var documentFiles: List<DocumentFileViewData> = listOf()
-
-    override val documentFileName: DocumentFileNameViewData? = null
 
     override fun onChangeFilter(filter: TypeFilter) = Unit
 
@@ -437,13 +391,7 @@ class FakeFilePickerComponent : FilePickerComponent {
 
     override fun onOpenFilesClick(uris: List<Uri>) = Unit
 
-    override fun onRemoveFileClick(uri: Uri) = Unit
-
     override fun onOpenRenameDialogClick(uri: Uri) = Unit
 
-    override fun onFileNameTextChanged(name: String) = Unit
-
-    override fun onRenameFileAcceptClick() = Unit
-
-    override fun onRenameFileCancelClick() = Unit
+    override fun onOpenRemoveDialogClick(uri: Uri) = Unit
 }

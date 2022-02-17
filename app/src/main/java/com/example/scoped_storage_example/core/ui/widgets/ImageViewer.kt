@@ -20,21 +20,29 @@ import com.example.scoped_storage_example.core.utils.FileTypes
 @Composable
 fun ImageViewer(
     uri: Uri?,
-    size: Dp,
     type: String,
-    modifier: Modifier = Modifier
+    size: Dp,
+    modifier: Modifier = Modifier,
+    isCropEnabled: Boolean = true,
 ) {
     if (type.startsWith(FileTypes.MIME_TYPE_IMAGE_ALL) || type.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
         val context = LocalContext.current
 
+        val sizeModifier = if (isCropEnabled) {
+            Modifier.size(size)
+        } else {
+            Modifier
+        }
+
         Image(
             modifier = modifier
-                .size(size)
+                .then(sizeModifier)
                 .clip(RoundedCornerShape(8.dp)),
             painter = rememberImagePainter(
                 uri,
                 builder = {
                     with(LocalDensity.current) { size(size.roundToPx()) }
+
                     placeholder(R.color.cardview_dark_background)
                     if (type.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
                         decoder(VideoFrameDecoder(context))
@@ -42,7 +50,9 @@ fun ImageViewer(
                     }
                 }
             ),
-            contentScale = ContentScale.Fit,
+            contentScale = if (isCropEnabled) {
+                ContentScale.Crop
+            } else ContentScale.Fit,
             contentDescription = null
         )
     }

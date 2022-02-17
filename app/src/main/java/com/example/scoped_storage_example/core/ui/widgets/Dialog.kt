@@ -1,11 +1,8 @@
 package com.example.scoped_storage_example.core.ui.widgets
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.runtime.Composable
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -16,7 +13,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.example.scoped_storage_example.R
 
-class DialogData(
+open class DialogData(
     val titleRes: Int,
     val messageRes: Int? = null,
     val onAcceptClick: (() -> Unit)? = null,
@@ -51,6 +48,18 @@ fun Dialog(
                 data.messageRes?.let { messageRes ->
                     Text(
                         text = stringResource(id = messageRes)
+                    )
+                }
+
+                if (data is EditTextDialogData) {
+                    var value by remember { mutableStateOf(data.initText) }
+
+                    OutlinedTextField(
+                        value = value,
+                        onValueChange = {
+                            value = it
+                            data.onTextChanged(it)
+                        }
                     )
                 }
             }

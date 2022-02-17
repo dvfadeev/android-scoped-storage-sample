@@ -1,15 +1,16 @@
 package com.example.scoped_storage_example.modules.file_picker.ui
 
 import android.net.Uri
+import com.example.scoped_storage_example.core.ui.widgets.DialogData
 import com.example.scoped_storage_example.core.utils.TypeFilter
 
 interface FilePickerComponent {
 
+    val dialogData: DialogData?
+
     val filter: TypeFilter
 
     val documentFiles: List<DocumentFileViewData>
-
-    val documentFileName: DocumentFileNameViewData?
 
     fun onChangeFilter(filter: TypeFilter)
 
@@ -17,15 +18,7 @@ interface FilePickerComponent {
 
     fun onOpenFilesClick(uris: List<Uri>)
 
-    fun onRemoveFileClick(uri: Uri)
-
-    // File rename dialog
-
     fun onOpenRenameDialogClick(uri: Uri)
 
-    fun onFileNameTextChanged(name: String)
-
-    fun onRenameFileAcceptClick()
-
-    fun onRenameFileCancelClick()
+    fun onOpenRemoveDialogClick(uri: Uri)
 }
