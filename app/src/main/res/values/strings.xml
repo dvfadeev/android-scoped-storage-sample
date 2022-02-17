@@ -43,6 +43,7 @@
     <string name="media_store_file_description">Description:</string>
     <string name="media_store_file_resolution">Resolution:</string>
     <string name="media_store_file_duration">Duration:</string>
+    <string name="media_store_file_content_preview">Content preview</string>
 
     <!-- FilePicker -->
     <string name="file_picker_title">File Picker</string>

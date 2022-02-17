@@ -221,21 +221,20 @@ private fun FileContent(
         }
 
         Text(
-            text = "Content preview",
+            text = stringResource(id = R.string.media_store_file_content_preview),
             modifier = Modifier
                 .padding(top = 16.dp, start = 16.dp, end = 16.dp)
         )
 
         val conf = LocalConfiguration.current
-        val size = conf.screenWidthDp.dp - 64.dp
 
         ImageViewer(
             uri = file.uri,
-            size = size,
+            size = conf.screenWidthDp.dp,
             type = file.mimeType,
             isCropEnabled = false,
             modifier = Modifier
-                .padding(horizontal = 32.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .align(CenterHorizontally)
         )
     }
@@ -364,7 +363,7 @@ fun FileField(
     modifier: Modifier = Modifier
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier
     ) {
         Text(
@@ -378,9 +377,7 @@ fun FileField(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.caption,
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .weight(1f)
+            modifier = Modifier.weight(1f)
         )
     }
 }

@@ -346,7 +346,7 @@ private fun DocumentFileField(
     icon: @Composable (() -> Unit)? = null
 ) {
     Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
@@ -362,7 +362,6 @@ private fun DocumentFileField(
             overflow = TextOverflow.Ellipsis,
 
             modifier = Modifier
-                .padding(start = 8.dp)
                 .weight(1f)
         )
         icon?.invoke()
