@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Scoped Storage Example</string>
+    <string name="app_name">Scoped Storage Sample</string>
     <string name="space_mb">%dmb</string>
     <string name="ok">OK</string>
     <string name="close">Close</string>
