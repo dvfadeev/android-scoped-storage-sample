@@ -58,7 +58,6 @@ class RealMediaStoreComponent(
         isRefreshing = true
         permissionValidator.requestPermission(
             permission = Manifest.permission.READ_EXTERNAL_STORAGE,
-            messageRes = R.string.media_store_read_permission_request,
             onUpdateDialogData = {
                 dialogData = it
             },
@@ -91,7 +90,6 @@ class RealMediaStoreComponent(
         } else {
             permissionValidator.requestPermission(
                 permission = Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                messageRes = R.string.media_store_save_photo_permission_request,
                 onUpdateDialogData = {
                     dialogData = it
                 },
@@ -140,7 +138,6 @@ class RealMediaStoreComponent(
         } else {
             permissionValidator.requestPermission(
                 permission = Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                messageRes = R.string.media_store_remove_file_permission_request,
                 onUpdateDialogData = {
                     dialogData = it
                 },
