@@ -56,7 +56,7 @@ class RealMediaStoreComponent(
 
     override fun onLoadMedia() {
         isRefreshing = true
-        permissionValidator.validatePermission(
+        permissionValidator.requestPermission(
             permission = Manifest.permission.READ_EXTERNAL_STORAGE,
             messageRes = R.string.media_store_read_permission_request,
             onUpdateDialogData = {
@@ -89,7 +89,7 @@ class RealMediaStoreComponent(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             action()
         } else {
-            permissionValidator.validatePermission(
+            permissionValidator.requestPermission(
                 permission = Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 messageRes = R.string.media_store_save_photo_permission_request,
                 onUpdateDialogData = {
@@ -138,7 +138,7 @@ class RealMediaStoreComponent(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             action()
         } else {
-            permissionValidator.validatePermission(
+            permissionValidator.requestPermission(
                 permission = Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 messageRes = R.string.media_store_remove_file_permission_request,
                 onUpdateDialogData = {
