@@ -56,9 +56,8 @@ class RealMediaStoreComponent(
 
     override fun onLoadMedia() {
         isRefreshing = true
-        permissionValidator.validatePermission(
+        permissionValidator.requestPermission(
             permission = Manifest.permission.READ_EXTERNAL_STORAGE,
-            messageRes = R.string.media_store_read_permission_request,
             onUpdateDialogData = {
                 dialogData = it
             },
@@ -89,9 +88,8 @@ class RealMediaStoreComponent(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             action()
         } else {
-            permissionValidator.validatePermission(
+            permissionValidator.requestPermission(
                 permission = Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                messageRes = R.string.media_store_save_photo_permission_request,
                 onUpdateDialogData = {
                     dialogData = it
                 },
@@ -128,9 +126,21 @@ class RealMediaStoreComponent(
     override fun onFileRemoveClick(uri: Uri) {
         val action: () -> Unit = {
             coroutineScope.launch {
-                if (mediaStore.removeMediaFile(uri)) {
-                    refresh()
-                    componentToast.show(R.string.media_store_file_remove_completed)
+                mediaStore.removeMediaFile(uri) {
+                    when (it) {
+                        MediaStoreGateway.FileRemoveResult.Completed -> {
+                            coroutineScope.launch {
+                                refresh()
+                            }
+                            componentToast.show(R.string.media_store_file_remove_completed)
+                        }
+                        MediaStoreGateway.FileRemoveResult.PermissionDenied -> {
+                            componentToast.show(R.string.media_store_file_remove_permission_denied)
+                        }
+                        MediaStoreGateway.FileRemoveResult.Error -> {
+                            componentToast.show(R.string.media_store_file_remove_error)
+                        }
+                    }
                 }
             }
         }
@@ -138,14 +148,16 @@ class RealMediaStoreComponent(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             action()
         } else {
-            permissionValidator.validatePermission(
+            permissionValidator.requestPermission(
                 permission = Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                messageRes = R.string.media_store_remove_file_permission_request,
                 onUpdateDialogData = {
                     dialogData = it
                 },
                 onGranted = {
                     action()
+                },
+                onDenied = {
+                    componentToast.show(R.string.media_store_file_remove_permission_denied)
                 }
             )
         }

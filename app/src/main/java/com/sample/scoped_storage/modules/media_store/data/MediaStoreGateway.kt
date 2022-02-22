@@ -10,7 +10,6 @@ interface MediaStoreGateway {
 
     companion object {
         const val API_30_MULTIPLY_WRITE_PERMISSIONS_ENABLED = true
-        const val WRITE_PERMISSION_REQUEST_ID = 3
     }
 
     suspend fun loadMediaFiles(filter: TypeFilter = TypeFilter.All): List<MediaFile>
@@ -19,5 +18,9 @@ interface MediaStoreGateway {
 
     suspend fun openMediaFile(uri: Uri): DetailedMediaFile?
 
-    suspend fun removeMediaFile(uri: Uri): Boolean
+    suspend fun removeMediaFile(uri: Uri, onFileRemoved: (FileRemoveResult) -> Unit)
+
+    enum class FileRemoveResult {
+        Completed, PermissionDenied, Error
+    }
 }

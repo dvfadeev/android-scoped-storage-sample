@@ -1,8 +1,5 @@
 package com.sample.scoped_storage.core.data
 
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.checkSelfPermission
 import com.eazypermissions.common.model.PermissionResult
 import com.eazypermissions.coroutinespermission.PermissionManager
 import com.sample.scoped_storage.R
@@ -19,12 +16,11 @@ class PermissionValidatorImpl(
 ) : PermissionValidator {
 
     /**
-     * This method controls permission validation
+     * Request permission method
      * [DialogData] - dialog data to be displayed in component
      */
-    override fun validatePermission(
+    override fun requestPermission(
         permission: String,
-        messageRes: Int,
         onUpdateDialogData: (DialogData?) -> Unit,
         onGranted: (() -> Unit),
         onDenied: (() -> Unit)?
@@ -39,58 +35,22 @@ class PermissionValidatorImpl(
         )
 
         scope.launch {
-            when (checkPermission(permission)) {
+            when (processPermission(permission)) {
                 PermissionValidator.Result.Granted -> {
                     onUpdateDialogData(null)
                     onGranted.invoke()
                 }
+                PermissionValidator.Result.Denied -> {
+                    onUpdateDialogData(permissionDeniedDialogData)
+                }
                 PermissionValidator.Result.DeniedPermanently -> {
                     onUpdateDialogData(permissionDeniedDialogData)
                 }
-
-                PermissionValidator.Result.Denied -> {
-                    onUpdateDialogData(DialogData(
-                        titleRes = R.string.media_store_permission_request_title,
-                        messageRes = messageRes,
-                        onAcceptClick = {
-                            scope.launch {
-                                when (requestPermission(permission)) {
-                                    PermissionValidator.Result.Granted -> {
-                                        onUpdateDialogData(null)
-                                        onGranted.invoke()
-                                    }
-                                    PermissionValidator.Result.Denied -> {
-                                        onUpdateDialogData(permissionDeniedDialogData)
-                                    }
-                                    PermissionValidator.Result.DeniedPermanently -> {
-                                        onUpdateDialogData(permissionDeniedDialogData)
-                                    }
-                                }
-                            }
-                        },
-                        onCancelClick = {
-                            onUpdateDialogData(null)
-                            onDenied?.invoke()
-                        }
-                    ))
-                }
             }
         }
     }
 
-    override suspend fun checkPermission(permission: String): PermissionValidator.Result {
-        return if (checkSelfPermission(activityProvider.getActivity(), permission) == PackageManager.PERMISSION_GRANTED) {
-            PermissionValidator.Result.Granted
-        } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activityProvider.getActivity(), permission)) {
-                PermissionValidator.Result.Denied
-            } else {
-                PermissionValidator.Result.DeniedPermanently
-            }
-        }
-    }
-
-    override suspend fun requestPermission(permission: String): PermissionValidator.Result = withContext(Dispatchers.Main) {
+    private suspend fun processPermission(permission: String): PermissionValidator.Result = withContext(Dispatchers.Main) {
         val permissionResult = PermissionManager.requestPermissions(
             activityProvider.getActivity(),
             PermissionValidator.REQUEST_ID,
@@ -108,7 +68,7 @@ class PermissionValidatorImpl(
                 PermissionValidator.Result.DeniedPermanently
             }
             is PermissionResult.ShowRational -> {
-                requestPermission(permission)
+                processPermission(permission)
             }
         }
     }
