@@ -126,9 +126,21 @@ class RealMediaStoreComponent(
     override fun onFileRemoveClick(uri: Uri) {
         val action: () -> Unit = {
             coroutineScope.launch {
-                if (mediaStore.removeMediaFile(uri)) {
-                    refresh()
-                    componentToast.show(R.string.media_store_file_remove_completed)
+                mediaStore.removeMediaFile(uri) {
+                    when (it) {
+                        MediaStoreGateway.FileRemoveResult.Completed -> {
+                            coroutineScope.launch {
+                                refresh()
+                            }
+                            componentToast.show(R.string.media_store_file_remove_completed)
+                        }
+                        MediaStoreGateway.FileRemoveResult.PermissionDenied -> {
+                            componentToast.show(R.string.media_store_file_remove_permission_denied)
+                        }
+                        MediaStoreGateway.FileRemoveResult.Error -> {
+                            componentToast.show(R.string.media_store_file_remove_error)
+                        }
+                    }
                 }
             }
         }
@@ -143,6 +155,9 @@ class RealMediaStoreComponent(
                 },
                 onGranted = {
                     action()
+                },
+                onDenied = {
+                    componentToast.show(R.string.media_store_file_remove_permission_denied)
                 }
             )
         }

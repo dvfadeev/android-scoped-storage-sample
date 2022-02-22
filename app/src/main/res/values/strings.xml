@@ -27,6 +27,8 @@
     <string name="media_store_save_photo_failed">Failed to save photo</string>
     <string name="media_store_file_remove">Remove</string>
     <string name="media_store_file_remove_completed">File removed</string>
+    <string name="media_store_file_remove_permission_denied">Permissions denied</string>
+    <string name="media_store_file_remove_error">Error</string>
     <string name="media_store_file_open_fail">Failed to open media file</string>
     <string name="media_store_file_name">Name:</string>
     <string name="media_store_file_title">Title:</string>

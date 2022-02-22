@@ -1,5 +1,6 @@
 package com.sample.scoped_storage.modules.media_store.data
 
+import android.app.Activity
 import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.ContentValues
@@ -9,7 +10,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import androidx.core.app.ActivityCompat.startIntentSenderForResult
+import androidx.activity.result.IntentSenderRequest
 import com.sample.scoped_storage.core.utils.ActivityProvider
 import com.sample.scoped_storage.core.utils.FileTypes
 import com.sample.scoped_storage.core.utils.TypeFilter
@@ -228,56 +229,72 @@ class MediaStoreGatewayImpl(
      * It will be removed from disk as well
      * On Android 10 and above, removing files that other apps own is restricted,
      * you need to ask for permission to delete a file
-     * @return operation result
+     * onFileRemoved - operation result
      */
-    override suspend fun removeMediaFile(uri: Uri): Boolean = withContext(Dispatchers.IO) {
-        val resolver = context.contentResolver
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            try {
-                resolver.delete(uri, null, null)
-            } catch (e: SecurityException) {
-
-                when {
-                    // API 30 creteWriteRequest from MediaStore
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
-                        val uris = if (MediaStoreGateway.API_30_MULTIPLY_WRITE_PERMISSIONS_ENABLED) {
-                            loadMediaFiles().map { it.uri }
-                        } else {
-                            listOf(uri)
-                        }
-                        val request = MediaStore.createWriteRequest(resolver, uris)
-                        try {
-                            startIntentSenderForResult(
-                                activityProvider.getActivity(),
-                                request.intentSender,
-                                MediaStoreGateway.WRITE_PERMISSION_REQUEST_ID,
-                                null, 0, 0, 0, null
-                            )
-                        } catch (e: IntentSender.SendIntentException) {
-                        }
-                    }
-
-                    // API 29 createWriteRequest from RecoverableSecurityException
-                    Build.VERSION.SDK_INT == Build.VERSION_CODES.Q -> {
-                        val intentSender = (e as? RecoverableSecurityException)?.userAction?.actionIntent?.intentSender
-                        intentSender?.let {
-                            try {
-                                startIntentSenderForResult(
-                                    activityProvider.getActivity(),
-                                    it,
-                                    MediaStoreGateway.WRITE_PERMISSION_REQUEST_ID,
-                                    null, 0, 0, 0, null
-                                )
-                            } catch (e: IntentSender.SendIntentException) {
+    override suspend fun removeMediaFile(uri: Uri, onFileRemoved: (MediaStoreGateway.FileRemoveResult) -> Unit) =
+        withContext(Dispatchers.IO) {
+            val resolver = context.contentResolver
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                try {
+                    resolver.delete(uri, null, null)
+                    onFileRemoved(MediaStoreGateway.FileRemoveResult.Completed)
+                } catch (e: SecurityException) {
+                    when {
+                        // API 30 creteWriteRequest from MediaStore
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                            val uris = if (MediaStoreGateway.API_30_MULTIPLY_WRITE_PERMISSIONS_ENABLED) {
+                                loadMediaFiles().map { it.uri }
+                            } else {
+                                listOf(uri)
                             }
+                            val request = IntentSenderRequest.Builder(MediaStore.createWriteRequest(resolver, uris).intentSender).build()
+                            try {
+                                activityProvider.getActivity().getIntentSenderResult(request) { result ->
+                                    when (result.resultCode) {
+                                        Activity.RESULT_OK -> {
+                                            resolver.delete(uri, null, null)
+                                            onFileRemoved(MediaStoreGateway.FileRemoveResult.Completed)
+                                        }
+                                        Activity.RESULT_CANCELED -> {
+                                            onFileRemoved(MediaStoreGateway.FileRemoveResult.PermissionDenied)
+                                        }
+                                    }
+                                }
+                            } catch (e: IntentSender.SendIntentException) {
+                                onFileRemoved(MediaStoreGateway.FileRemoveResult.Error)
+                            }
+                        }
+
+                        // API 29 createWriteRequest from RecoverableSecurityException
+                        Build.VERSION.SDK_INT == Build.VERSION_CODES.Q -> {
+                            val intentSender = (e as? RecoverableSecurityException)?.userAction?.actionIntent?.intentSender
+                            intentSender?.let {
+                                try {
+                                    val request = IntentSenderRequest.Builder(it).build()
+                                    activityProvider.getActivity().getIntentSenderResult(request) { result ->
+                                        when (result.resultCode) {
+                                            Activity.RESULT_OK -> {
+                                                resolver.delete(uri, null, null)
+                                                onFileRemoved(MediaStoreGateway.FileRemoveResult.Completed)
+                                            }
+                                            Activity.RESULT_CANCELED -> {
+                                                onFileRemoved(MediaStoreGateway.FileRemoveResult.PermissionDenied)
+                                            }
+                                        }
+                                    }
+                                } catch (e: IntentSender.SendIntentException) {
+                                }
+                            }
+                        }
+                        else -> {
+                            onFileRemoved(MediaStoreGateway.FileRemoveResult.Error)
                         }
                     }
                 }
-                return@withContext false
+            } else {
+                resolver.delete(uri, null, null)
+                onFileRemoved(MediaStoreGateway.FileRemoveResult.Completed)
             }
-        } else {
-            resolver.delete(uri, null, null)
+            return@withContext
         }
-        return@withContext true
-    }
 }
