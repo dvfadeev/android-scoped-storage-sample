@@ -85,9 +85,9 @@ class RealAppStorageComponent(
 
     private fun setAppStore() {
         appStorage = if (isInternalStorage) {
-            externalStorage
-        } else {
             internalStorage
+        } else {
+            externalStorage
         }
     }
 
