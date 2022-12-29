@@ -6,8 +6,8 @@ import androidx.compose.runtime.setValue
 import com.arkivanov.decompose.ComponentContext
 import com.sample.scoped_storage.R
 import com.sample.scoped_storage.core.data.ComponentToast
-import com.sample.scoped_storage.core.utils.FileTypes
 import com.sample.scoped_storage.core.data.Logger
+import com.sample.scoped_storage.core.utils.FileTypes
 import com.sample.scoped_storage.core.utils.componentCoroutineScope
 import com.sample.scoped_storage.modules.app_storage.data.AppStorageGateway
 import com.sample.scoped_storage.modules.app_storage.data.AppStorageGatewayExternal
@@ -34,11 +34,11 @@ class RealAppStorageComponent(
 
     override var availableSpace: Long by mutableStateOf(0)
 
-    override var files: List<StorageFileViewData> by mutableStateOf(listOf())
+    override var files: List<FileNameViewData> by mutableStateOf(listOf())
 
     override var isShowFileContent: Boolean by mutableStateOf(false)
 
-    override var selectedFile: StorageFileContentViewData? by mutableStateOf(null)
+    override var selectedFile: FileNameWithContentViewData? by mutableStateOf(null)
 
     init {
         logger.log("Init AppStorageComponent")

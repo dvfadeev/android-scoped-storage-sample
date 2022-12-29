@@ -1,4 +1,4 @@
-package com.sample.scoped_storage.modules.media_store.data.models
+package com.sample.scoped_storage.modules.media_store.domain
 
 import android.net.Uri
 

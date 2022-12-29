@@ -2,7 +2,7 @@ package com.sample.scoped_storage.modules.media_store.ui
 
 import android.net.Uri
 import com.sample.scoped_storage.core.data.FILE_DATE_PATTERN
-import com.sample.scoped_storage.modules.media_store.data.models.DetailedMediaFile
+import com.sample.scoped_storage.modules.media_store.domain.DetailedMediaFile
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -13,7 +13,7 @@ data class DetailedImageFileViewData(
     val path: String,
     val mimeType: String,
     val size: String,
-    val dateAdded: String,
+    val dateAdded: String?,
     val dateTaken: String?,
     val description: String,
     val resolution: String?,
@@ -30,10 +30,8 @@ fun DetailedMediaFile.toViewData(): DetailedImageFileViewData {
         path = path ?: "unknown",
         mimeType = mimeType ?: "unknown",
         size = sizeKb.toString() + "KB",
-        dateAdded = dateFormatter.format(Date(dateAdded)),
-        dateTaken = dateTaken?.let {
-            dateFormatter.format(Date(it))
-        },
+        dateAdded = dateAdded?.let { dateFormatter.format(Date(it)) },
+        dateTaken = dateTaken?.let { dateFormatter.format(Date(it)) },
         description = description ?: "empty",
         resolution = if (height != null && width != null) {
             "$height x $width"
@@ -47,4 +45,3 @@ fun DetailedMediaFile.toViewData(): DetailedImageFileViewData {
         }
     )
 }
-

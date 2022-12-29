@@ -5,8 +5,8 @@ import android.os.Build
 import android.os.StatFs
 import android.os.storage.StorageManager
 import androidx.core.content.getSystemService
-import com.sample.scoped_storage.modules.app_storage.data.models.StorageFile
-import com.sample.scoped_storage.modules.app_storage.data.models.StorageFileContent
+import com.sample.scoped_storage.modules.app_storage.domain.FileName
+import com.sample.scoped_storage.modules.app_storage.domain.FileNameWithContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -51,7 +51,7 @@ class AppStorageGatewayInternal(private val context: Context) : AppStorageGatewa
      * @return storage file content
      * @throws java.io.FileNotFoundException
      */
-    override suspend fun openFile(fileName: String): StorageFileContent = withContext(Dispatchers.IO) {
+    override suspend fun openFile(fileName: String): FileNameWithContent = withContext(Dispatchers.IO) {
         var content = ""
 
         if (useFileApi) {
@@ -62,7 +62,7 @@ class AppStorageGatewayInternal(private val context: Context) : AppStorageGatewa
             }
         }
 
-        return@withContext StorageFileContent(
+        return@withContext FileNameWithContent(
             name = fileName,
             content = content
         )
@@ -84,11 +84,11 @@ class AppStorageGatewayInternal(private val context: Context) : AppStorageGatewa
      * Get a list of all internal storage files
      * @return list of all storage files
      */
-    override suspend fun getFilesList(): List<StorageFile> {
+    override suspend fun getFilesList(): List<FileName> {
         return if (useFileApi) {
-            rootFile.listFiles()?.map { it.name }?.map { StorageFile(it) } ?: listOf()
+            rootFile.listFiles()?.map { it.name }?.map { FileName(it) } ?: listOf()
         } else {
-            context.fileList().toList().sortedBy { it }.map { StorageFile(it) }
+            context.fileList().toList().sortedBy { it }.map { FileName(it) }
         }
     }
 

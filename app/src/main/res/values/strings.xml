@@ -47,7 +47,9 @@
     <string name="file_picker_launch">Open</string>
     <string name="file_picker_launch_text">Press button to open native file picker</string>
     <string name="file_picker_launch_multiply_text">Press button to open native multiply files picker (hold to select file)</string>
-    <string name="file_picker_file_open_fail">Failed to open document file</string>
+    <string name="file_picker_launch_photo_text">Press button to open native photo picker (30+ API)</string>
+    <string name="file_picker_document_file_open_fail">Failed to open document file</string>
+    <string name="file_picker_media_file_open_fail">Failed to open media file</string>
     <string name="file_picker_previous">Previous</string>
     <string name="file_picker_next">Next</string>
     <string name="file_picker_file_name">Name:</string>

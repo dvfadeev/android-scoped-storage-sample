@@ -1,6 +1,9 @@
 package com.sample.scoped_storage.modules.file_picker.ui
 
+import android.app.Activity.RESULT_OK
+import android.content.Intent
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -18,14 +21,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.sample.scoped_storage.R
 import com.sample.scoped_storage.core.ui.theme.AppTheme
 import com.sample.scoped_storage.core.ui.widgets.*
 import com.sample.scoped_storage.core.utils.AvailableFilters
+import com.sample.scoped_storage.core.utils.PhotoPickerAvailabilityChecker
 import com.sample.scoped_storage.core.utils.TypeFilter
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,20 +67,30 @@ private fun FilePickerContent(
     modifier: Modifier = Modifier,
     dialogData: DialogData?,
     filter: TypeFilter,
-    documentFiles: List<DocumentFileViewData>,
+    documentFiles: List<FileViewData>,
     onChangeFilter: (TypeFilter) -> Unit,
-    onOpenFileClick: (Uri) -> Unit,
+    onOpenFileClick: (Uri, Boolean) -> Unit,
     onOpenFilesClick: (List<Uri>) -> Unit,
     onOpenRenameDialogClick: (Uri) -> Unit,
     onOpenRemoveDialogClick: (Uri) -> Unit
 ) {
     val pickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let {
-            onOpenFileClick(uri)
+            onOpenFileClick(uri, true)
         }
     }
+
     val multiplePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         onOpenFilesClick(uris)
+    }
+
+    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val intent = result.data
+            intent?.data?.let { uri ->
+                onOpenFileClick(uri, false)
+            }
+        }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -127,6 +141,32 @@ private fun FilePickerContent(
                         text = stringResource(id = R.string.file_picker_launch),
                         onClick = { multiplePickerLauncher.launch(arrayOf(filter.mime)) }
                     )
+                }
+            }
+
+            if (PhotoPickerAvailabilityChecker.isPhotoPickerAvailable()) {
+                CustomCard(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(all = 16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.file_picker_launch_photo_text),
+                            modifier = Modifier.weight(1f)
+                        )
+                        ControlButton(
+                            text = stringResource(id = R.string.file_picker_launch),
+                            onClick = {
+                                photoLauncher.launch(
+                                    Intent(MediaStore.ACTION_PICK_IMAGES).apply {
+                                        type = "image/*"
+                                    }
+                                )
+                            }
+                        )
+                    }
                 }
             }
 
@@ -255,72 +295,68 @@ private fun PageSwitcher(
 
 @Composable
 private fun DocumentFileItem(
-    data: DocumentFileViewData,
+    data: FileViewData,
     onOpenRenameDialogClick: () -> Unit,
     onRemoveFileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     CustomCard(modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp)) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(16.dp)
         ) {
             DocumentFileField(
                 title = stringResource(id = R.string.file_picker_file_name),
                 text = data.name,
                 icon = {
-                    IconButton(
-                        onClick = onOpenRenameDialogClick,
-                        modifier = Modifier
-                            .padding(start = 12.dp)
-                            .size(20.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(android.R.drawable.ic_menu_edit),
-                            contentDescription = null,
-                            tint = MaterialTheme.colors.primary
-                        )
+                    if (data.isDocument) {
+                        IconButton(
+                            onClick = onOpenRenameDialogClick,
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .size(20.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(android.R.drawable.ic_menu_edit),
+                                contentDescription = null,
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
                     }
                 }
             )
-
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_id), text = data.id)
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_flags), text = data.flags)
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_mime_type), text = data.mimeType)
             DocumentFileField(title = stringResource(id = R.string.file_picker_file_size), text = data.sizeKb)
+            DocumentFileField(title = stringResource(id = R.string.file_picker_file_date_modified), text = data.dateModified)
+            DocumentFileField(title = stringResource(id = R.string.file_picker_file_icon), text = data.icon)
+            DocumentFileField(title = stringResource(id = R.string.file_picker_file_summary), text = data.summary)
+            if (data.isDocument) {
+                IconButton(
+                    onClick = onRemoveFileClick,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .size(24.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(android.R.drawable.ic_menu_delete),
+                        contentDescription = null,
+                        tint = MaterialTheme.colors.primary
+                    )
+                }
+            }
 
-            data.dateModified?.let {
-                DocumentFileField(title = stringResource(id = R.string.file_picker_file_date_modified), text = it)
-            }
-            data.icon?.let {
-                DocumentFileField(title = stringResource(id = R.string.file_picker_file_icon), text = it)
-            }
-            data.summary?.let {
-                DocumentFileField(title = stringResource(id = R.string.file_picker_file_summary), text = it)
-            }
-
-            IconButton(
-                onClick = onRemoveFileClick,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .size(24.dp)
-            ) {
-                Icon(
-                    painter = painterResource(android.R.drawable.ic_menu_delete),
-                    contentDescription = null,
-                    tint = MaterialTheme.colors.primary
+            if (data.mimeType != null) {
+                ImageViewer(
+                    uri = data.uri,
+                    size = LocalConfiguration.current.screenWidthDp.dp,
+                    isCropEnabled = false,
+                    type = data.mimeType,
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .align(Alignment.CenterHorizontally)
                 )
             }
-
-            ImageViewer(
-                uri = data.uri,
-                size = LocalConfiguration.current.screenWidthDp.dp,
-                isCropEnabled = false,
-                type = data.mimeType,
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
         }
     }
 }
@@ -342,12 +378,17 @@ private fun CustomCard(
 @Composable
 private fun DocumentFileField(
     title: String,
-    text: String,
+    text: String?,
     icon: @Composable (() -> Unit)? = null
 ) {
+    if (text == null) {
+        return
+    }
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 4.dp)
     ) {
         Text(
             text = title,
@@ -382,11 +423,11 @@ class FakeFilePickerComponent : FilePickerComponent {
 
     override var filter: TypeFilter = TypeFilter.All
 
-    override var documentFiles: List<DocumentFileViewData> = listOf()
+    override var documentFiles: List<FileViewData> = listOf()
 
     override fun onChangeFilter(filter: TypeFilter) = Unit
 
-    override fun onOpenFileClick(uri: Uri) = Unit
+    override fun onOpenFileClick(uri: Uri, isDocument: Boolean) = Unit
 
     override fun onOpenFilesClick(uris: List<Uri>) = Unit
 

@@ -63,7 +63,7 @@ private fun AppStorageContent(
     modifier: Modifier = Modifier,
     isInternalStorage: Boolean,
     availableSpace: Long,
-    files: List<StorageFileViewData>,
+    files: List<FileNameViewData>,
     onToggleStorageClick: () -> Unit,
     onSaveLogClick: () -> Unit,
     onFileOpenClick: (String) -> Unit,
@@ -99,7 +99,7 @@ private fun AppStorageContent(
 @Composable
 private fun FileContent(
     modifier: Modifier = Modifier,
-    file: StorageFileContentViewData?
+    file: FileNameWithContentViewData?
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -177,7 +177,6 @@ private fun AppStorageToggleItem(
     }
 }
 
-
 @Composable
 private fun AppStorageCardItem(
     text: String,
@@ -211,7 +210,7 @@ private fun AppStorageCardItem(
 private fun DirectoriesItem(
     isInternalStorage: Boolean,
     availableSpace: Long,
-    files: List<StorageFileViewData>,
+    files: List<FileNameViewData>,
     onFileOpenClick: (String) -> Unit,
     onFileRemoveClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -251,7 +250,6 @@ private fun DirectoriesItem(
                     text = stringResource(id = R.string.space_mb, availableSpace),
                 )
             }
-
             val listState = rememberLazyListState()
             LazyColumn(
                 modifier = Modifier
@@ -298,7 +296,7 @@ private fun DirectoriesItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FileItem(
-    file: StorageFileViewData,
+    file: FileNameViewData,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -354,9 +352,9 @@ class FakeAppStorageComponent : AppStorageComponent {
 
     override var availableSpace: Long = 100
 
-    override var files: List<StorageFileViewData> = StorageFileViewData.mocks()
+    override var files: List<FileNameViewData> = FileNameViewData.mocks()
 
-    override var selectedFile: StorageFileContentViewData? = null
+    override var selectedFile: FileNameWithContentViewData? = null
 
     override var isShowFileContent: Boolean = false
 

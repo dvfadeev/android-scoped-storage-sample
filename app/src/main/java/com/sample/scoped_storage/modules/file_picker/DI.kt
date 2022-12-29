@@ -17,5 +17,5 @@ val filePickerModule = module {
 fun ComponentFactory.createFilePickerComponent(
     componentContext: ComponentContext
 ): FilePickerComponent {
-    return RealFilePickerComponent(componentContext, get(), get(), get())
+    return RealFilePickerComponent(componentContext, get(), get(), get(), get())
 }

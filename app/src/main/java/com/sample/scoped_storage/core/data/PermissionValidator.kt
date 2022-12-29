@@ -11,7 +11,7 @@ interface PermissionValidator {
     fun requestPermission(
         permission: String,
         onUpdateDialogData: (DialogData?) -> Unit,
-        onGranted: (() -> Unit),
+        onGranted: (() -> Unit) = { },
         onDenied: (() -> Unit)? = null
     )
 

@@ -4,6 +4,7 @@ import android.Manifest
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -50,28 +51,18 @@ class RealMediaStoreComponent(
     init {
         logger.log("Init AppStorageComponent")
         backPressedHandler.register(::onBackPressed)
-
         onLoadMedia()
     }
 
     override fun onLoadMedia() {
         isRefreshing = true
-        permissionValidator.requestPermission(
-            permission = Manifest.permission.READ_EXTERNAL_STORAGE,
-            onUpdateDialogData = {
-                dialogData = it
-            },
-            onGranted = {
-                coroutineScope.launch {
-                    refresh()
-                    logger.log("Media loaded")
-                    isRefreshing = false
-                }
-            },
-            onDenied = {
-                onOutput(MediaStoreComponent.Output.NavigationRequested)
-            }
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Since Android TIRAMISU (API 33), the permissions to read the media file have been changed
+            // Reed more: https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions
+            requestTeramisuLoadPermission()
+        } else {
+            requestLoadPermission()
+        }
     }
 
     override fun onSaveBitmap(bitmap: Bitmap) {
@@ -85,6 +76,7 @@ class RealMediaStoreComponent(
             }
         }
 
+        // WRITE_EXTERNAL_STORAGE permission is not actual since Android Q (API 29)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             action()
         } else {
@@ -145,6 +137,7 @@ class RealMediaStoreComponent(
             }
         }
 
+        // WRITE_EXTERNAL_STORAGE permission is not actual since Android Q (API 29)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             action()
         } else {
@@ -178,5 +171,47 @@ class RealMediaStoreComponent(
             }
             else -> false
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun requestTeramisuLoadPermission() {
+        permissionValidator.requestPermission(
+            permission = Manifest.permission.READ_MEDIA_IMAGES,
+            onUpdateDialogData = {
+                dialogData = it
+            },
+            onGranted = {
+                permissionValidator.requestPermission(Manifest.permission.READ_MEDIA_VIDEO, onUpdateDialogData = {
+                    dialogData = it
+                })
+                coroutineScope.launch {
+                    refresh()
+                    logger.log("Media loaded")
+                    isRefreshing = false
+                }
+            },
+            onDenied = {
+                onOutput(MediaStoreComponent.Output.NavigationRequested)
+            }
+        )
+    }
+
+    private fun requestLoadPermission() {
+        permissionValidator.requestPermission(
+            permission = Manifest.permission.READ_EXTERNAL_STORAGE,
+            onUpdateDialogData = {
+                dialogData = it
+            },
+            onGranted = {
+                coroutineScope.launch {
+                    refresh()
+                    logger.log("Media loaded")
+                    isRefreshing = false
+                }
+            },
+            onDenied = {
+                onOutput(MediaStoreComponent.Output.NavigationRequested)
+            }
+        )
     }
 }

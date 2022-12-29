@@ -94,7 +94,6 @@ private fun MediaStoreContent(
             },
             isShowSecondScreen = component.isShowImageFileContent
         )
-
         component.dialogData?.let {
             Dialog(data = it)
         }
@@ -192,7 +191,6 @@ private fun FileContent(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp)
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(all = 16.dp)
@@ -203,20 +201,10 @@ private fun FileContent(
                 FileField(title = stringResource(id = R.string.media_store_file_mime_type), text = file.mimeType)
                 FileField(title = stringResource(id = R.string.media_store_file_size), text = file.size)
                 FileField(title = stringResource(id = R.string.media_store_file_date_added), text = file.dateAdded)
-
-                file.dateTaken?.let {
-                    FileField(title = stringResource(id = R.string.media_store_file_date_taken), text = it)
-                }
-
+                FileField(title = stringResource(id = R.string.media_store_file_date_taken), text = file.dateTaken)
                 FileField(title = stringResource(id = R.string.media_store_file_description), text = file.description)
-
-                file.resolution?.let {
-                    FileField(title = stringResource(id = R.string.media_store_file_resolution), text = it)
-                }
-
-                file.duration?.let {
-                    FileField(title = stringResource(id = R.string.media_store_file_duration), text = it)
-                }
+                FileField(title = stringResource(id = R.string.media_store_file_resolution), text = file.resolution)
+                FileField(title = stringResource(id = R.string.media_store_file_duration), text = file.duration)
             }
         }
 
@@ -359,12 +347,13 @@ private fun MediaFileItem(
 @Composable
 fun FileField(
     title: String,
-    text: String,
+    text: String?,
     modifier: Modifier = Modifier
 ) {
+    if (text == null) return
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier
+        modifier = modifier.padding(bottom = 4.dp)
     ) {
         Text(
             text = title,

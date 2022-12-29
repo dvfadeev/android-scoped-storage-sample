@@ -1,7 +1,7 @@
 package com.sample.scoped_storage.modules.file_picker.data
 
 import android.net.Uri
-import com.sample.scoped_storage.modules.file_picker.data.models.DocumentFile
+import com.sample.scoped_storage.modules.file_picker.domain.DocumentFile
 
 interface FilePickerGateway {
 
