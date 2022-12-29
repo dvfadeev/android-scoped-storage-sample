@@ -57,6 +57,8 @@ class RealMediaStoreComponent(
     override fun onLoadMedia() {
         isRefreshing = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Since Android TIRAMISU (API 33), the permissions to read the media file have been changed
+            // Reed more: https://developer.android.com/about/versions/13/behavior-changes-13#granular-media-permissions
             requestTeramisuLoadPermission()
         } else {
             requestLoadPermission()
@@ -74,6 +76,7 @@ class RealMediaStoreComponent(
             }
         }
 
+        // WRITE_EXTERNAL_STORAGE permission is not actual since Android Q (API 29)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             action()
         } else {
@@ -134,6 +137,7 @@ class RealMediaStoreComponent(
             }
         }
 
+        // WRITE_EXTERNAL_STORAGE permission is not actual since Android Q (API 29)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             action()
         } else {
