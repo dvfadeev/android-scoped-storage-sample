@@ -1,10 +1,8 @@
 package com.sample.scoped_storage.modules.file_picker.ui
 
-import android.app.Activity.RESULT_OK
-import android.content.Intent
 import android.net.Uri
-import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -84,12 +82,9 @@ private fun FilePickerContent(
         onOpenFilesClick(uris)
     }
 
-    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val intent = result.data
-            intent?.data?.let { uri ->
-                onOpenFileClick(uri, false)
-            }
+    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { result ->
+        result?.let {
+            onOpenFileClick(result, false)
         }
     }
 
@@ -160,9 +155,7 @@ private fun FilePickerContent(
                             text = stringResource(id = R.string.file_picker_launch),
                             onClick = {
                                 photoLauncher.launch(
-                                    Intent(MediaStore.ACTION_PICK_IMAGES).apply {
-                                        type = "image/*"
-                                    }
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)
                                 )
                             }
                         )
