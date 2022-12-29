@@ -11,11 +11,9 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.result.IntentSenderRequest
-import com.sample.scoped_storage.core.utils.ActivityProvider
-import com.sample.scoped_storage.core.utils.FileTypes
-import com.sample.scoped_storage.core.utils.TypeFilter
-import com.sample.scoped_storage.modules.media_store.data.models.DetailedMediaFile
-import com.sample.scoped_storage.modules.media_store.data.models.MediaFile
+import com.sample.scoped_storage.core.utils.*
+import com.sample.scoped_storage.modules.media_store.domain.DetailedMediaFile
+import com.sample.scoped_storage.modules.media_store.domain.MediaFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -170,12 +168,14 @@ class MediaStoreGatewayImpl(
         )?.use { cursor ->
             cursor.moveToFirst()
 
-            val name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME))
-            val title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.TITLE))
-            val path = cursor.getString(cursor.getColumnIndexOrThrow(pathColumn))
-            val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE))
-            val sizeKb = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)) / 1024
-            val dateAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)) * 1000
+            val name = cursor.getStringFromColumn(MediaStore.Files.FileColumns.DISPLAY_NAME)
+            val title = cursor.getNullableStringFromColumn(MediaStore.Files.FileColumns.TITLE)
+            val path = cursor.getNullableStringFromColumn(pathColumn)
+            val mimeType = cursor.getStringFromColumn(MediaStore.Files.FileColumns.MIME_TYPE)
+            val sizeKb = cursor.getIntFromColumn(MediaStore.Files.FileColumns.SIZE) / 1024
+            val dateAdded = cursor.getNullableLongFromColumn(MediaStore.Files.FileColumns.DATE_ADDED)?.let {
+                it * 1000
+            }
 
             // Image / Video fields
             val height: String?
@@ -184,10 +184,10 @@ class MediaStoreGatewayImpl(
             val description: String?
 
             if (mimeType.startsWith(FileTypes.MIME_TYPE_IMAGE_ALL) || mimeType.startsWith(FileTypes.MIME_TYPE_VIDEO_ALL)) {
-                height = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT))
-                width = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH))
-                dateTaken = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN))
-                description = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DESCRIPTION))
+                height = cursor.getNullableStringFromColumn(MediaStore.Files.FileColumns.HEIGHT)
+                width = cursor.getNullableStringFromColumn(MediaStore.Files.FileColumns.WIDTH)
+                dateTaken = cursor.getNullableLongFromColumn(MediaStore.Images.ImageColumns.DATE_TAKEN)
+                description = cursor.getNullableStringFromColumn(MediaStore.Images.ImageColumns.DESCRIPTION)
             } else {
                 height = null
                 width = null
@@ -240,7 +240,7 @@ class MediaStoreGatewayImpl(
                     onFileRemoved(MediaStoreGateway.FileRemoveResult.Completed)
                 } catch (e: SecurityException) {
                     when {
-                        // API 30 creteWriteRequest from MediaStore
+                        // API 30 createWriteRequest from MediaStore
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
                             val uris = if (MediaStoreGateway.API_30_MULTIPLY_WRITE_PERMISSIONS_ENABLED) {
                                 loadMediaFiles().map { it.uri }
@@ -283,6 +283,7 @@ class MediaStoreGatewayImpl(
                                         }
                                     }
                                 } catch (e: IntentSender.SendIntentException) {
+                                    // Nothing
                                 }
                             }
                         }

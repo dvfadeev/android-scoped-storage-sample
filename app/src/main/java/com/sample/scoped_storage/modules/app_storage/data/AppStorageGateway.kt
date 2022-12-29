@@ -1,17 +1,17 @@
 package com.sample.scoped_storage.modules.app_storage.data
 
-import com.sample.scoped_storage.modules.app_storage.data.models.StorageFile
-import com.sample.scoped_storage.modules.app_storage.data.models.StorageFileContent
+import com.sample.scoped_storage.modules.app_storage.domain.FileName
+import com.sample.scoped_storage.modules.app_storage.domain.FileNameWithContent
 
 interface AppStorageGateway {
 
     suspend fun writeFile(fileName: String, type: String, content: String)
 
-    suspend fun openFile(fileName: String): StorageFileContent
+    suspend fun openFile(fileName: String): FileNameWithContent
 
     suspend fun removeFile(fileName: String)
 
-    suspend fun getFilesList(): List<StorageFile>
+    suspend fun getFilesList(): List<FileName>
 
     suspend fun getAvailableSpaceMb(): Long
 

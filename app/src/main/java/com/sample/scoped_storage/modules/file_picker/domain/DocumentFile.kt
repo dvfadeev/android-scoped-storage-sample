@@ -1,4 +1,4 @@
-package com.sample.scoped_storage.modules.file_picker.data.models
+package com.sample.scoped_storage.modules.file_picker.domain
 
 import android.net.Uri
 

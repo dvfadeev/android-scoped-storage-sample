@@ -3,8 +3,8 @@ package com.sample.scoped_storage.modules.media_store.data
 import android.graphics.Bitmap
 import android.net.Uri
 import com.sample.scoped_storage.core.utils.TypeFilter
-import com.sample.scoped_storage.modules.media_store.data.models.DetailedMediaFile
-import com.sample.scoped_storage.modules.media_store.data.models.MediaFile
+import com.sample.scoped_storage.modules.media_store.domain.DetailedMediaFile
+import com.sample.scoped_storage.modules.media_store.domain.MediaFile
 
 interface MediaStoreGateway {
 

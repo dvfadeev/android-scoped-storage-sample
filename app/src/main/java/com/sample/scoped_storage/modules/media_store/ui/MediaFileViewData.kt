@@ -2,7 +2,7 @@ package com.sample.scoped_storage.modules.media_store.ui
 
 import android.net.Uri
 import com.sample.scoped_storage.core.data.FILE_DATE_PATTERN
-import com.sample.scoped_storage.modules.media_store.data.models.MediaFile
+import com.sample.scoped_storage.modules.media_store.domain.MediaFile
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -13,13 +13,15 @@ import com.sample.scoped_storage.core.ui.widgets.EditTextDialogData
 import com.sample.scoped_storage.core.utils.TypeFilter
 import com.sample.scoped_storage.core.utils.componentCoroutineScope
 import com.sample.scoped_storage.modules.file_picker.data.FilePickerGateway
+import com.sample.scoped_storage.modules.media_store.data.MediaStoreGateway
 import kotlinx.coroutines.launch
 
 class RealFilePickerComponent(
     componentContext: ComponentContext,
     private val componentToast: ComponentToast,
     private val logger: Logger,
-    private val filePicker: FilePickerGateway
+    private val filePicker: FilePickerGateway,
+    private val mediaStore: MediaStoreGateway
 ) : ComponentContext by componentContext, FilePickerComponent {
 
     private val coroutineScope = componentCoroutineScope()
@@ -28,7 +30,7 @@ class RealFilePickerComponent(
 
     override var filter: TypeFilter by mutableStateOf(TypeFilter.All)
 
-    override var documentFiles: List<DocumentFileViewData> by mutableStateOf(listOf())
+    override var documentFiles: List<FileViewData> by mutableStateOf(listOf())
 
     init {
         logger.log("Init FilePicker")
@@ -38,9 +40,13 @@ class RealFilePickerComponent(
         this.filter = filter
     }
 
-    override fun onOpenFileClick(uri: Uri) {
+    override fun onOpenFileClick(uri: Uri, isDocument: Boolean) {
         coroutineScope.launch {
-            loadDocument(uri)
+            if (isDocument) {
+                loadDocument(uri)
+            } else {
+                loadMediaFile(uri)
+            }
         }
     }
 
@@ -108,13 +114,20 @@ class RealFilePickerComponent(
 
     private suspend fun loadDocument(uri: Uri) {
         filePicker.openDocument(uri)?.let {
-            documentFiles = listOf(it.toViewData())
-            logger.log("File opened")
-        } ?: componentToast.show(R.string.file_picker_file_open_fail)
+            documentFiles = listOf(it.toFileViewData())
+            logger.log("Document file opened")
+        } ?: componentToast.show(R.string.file_picker_document_file_open_fail)
+    }
+
+    private suspend fun loadMediaFile(uri: Uri) {
+        mediaStore.openMediaFile(uri)?.let {
+            documentFiles = listOf(it.toFileViewData())
+            logger.log("Media file opened")
+        } ?: componentToast.show(R.string.file_picker_media_file_open_fail)
     }
 
     private suspend fun loadDocuments(uris: List<Uri>) {
-        documentFiles = filePicker.openDocuments(uris).map { it.toViewData() }
+        documentFiles = filePicker.openDocuments(uris).map { it.toFileViewData() }
         logger.log("Files opened")
     }
 }

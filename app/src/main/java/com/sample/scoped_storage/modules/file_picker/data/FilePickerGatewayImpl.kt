@@ -3,7 +3,10 @@ package com.sample.scoped_storage.modules.file_picker.data
 import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
-import com.sample.scoped_storage.modules.file_picker.data.models.DocumentFile
+import com.sample.scoped_storage.core.utils.getIntFromColumn
+import com.sample.scoped_storage.core.utils.getLongFromColumn
+import com.sample.scoped_storage.core.utils.getStringFromColumn
+import com.sample.scoped_storage.modules.file_picker.domain.DocumentFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
@@ -43,14 +46,14 @@ class FilePickerGatewayImpl(private val context: Context) : FilePickerGateway {
         )?.use { cursor ->
             cursor.moveToFirst()
 
-            val name = cursor.getString(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME))
-            val id = cursor.getString(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID))
-            val flags = cursor.getInt(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_FLAGS))
-            val mimeType = cursor.getString(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE))
-            val sizeKb = cursor.getLong(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_SIZE)) / 1024
-            val dateModified = cursor.getLong(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED))
-            val icon = cursor.getInt(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_ICON))
-            val summary = cursor.getString(cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_SUMMARY))
+            val name = cursor.getStringFromColumn(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+            val id = cursor.getStringFromColumn(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+            val flags = cursor.getIntFromColumn(DocumentsContract.Document.COLUMN_FLAGS)
+            val mimeType = cursor.getStringFromColumn(DocumentsContract.Document.COLUMN_MIME_TYPE)
+            val sizeKb = cursor.getLongFromColumn(DocumentsContract.Document.COLUMN_SIZE) / 1024
+            val dateModified = cursor.getLongFromColumn(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
+            val icon = cursor.getIntFromColumn(DocumentsContract.Document.COLUMN_ICON)
+            val summary = cursor.getStringFromColumn(DocumentsContract.Document.COLUMN_SUMMARY)
 
             resultImage = DocumentFile(
                 uri = uri,

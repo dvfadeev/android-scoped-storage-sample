@@ -6,9 +6,9 @@ interface AppStorageComponent {
 
     val availableSpace: Long
 
-    val files: List<StorageFileViewData>
+    val files: List<FileNameViewData>
 
-    val selectedFile: StorageFileContentViewData?
+    val selectedFile: FileNameWithContentViewData?
 
     val isShowFileContent: Boolean
 
